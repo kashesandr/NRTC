@@ -1,0 +1,10 @@
+.row
+    .col-md-12
+        table.table.table-striped.table-bordered.table-hover.table-condensed
+            thead
+                th Time
+                th Code
+            tbody
+                tr(ng-repeat="card in model | orderBy:'date':true")
+                    td {{card.date | amDateFormat:'HH:mm:ss (dddd, MMMM Do YYYY)'}}
+                    td {{card.code}}

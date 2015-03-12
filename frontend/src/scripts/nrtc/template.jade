@@ -1,0 +1,10 @@
+.row
+    .col-md-8.col-md-offset-2
+        h1 Time Control
+        tabset
+            tab(heading='Current Users')
+                h2 Current Users
+                nrtc-table(ng-model="data.activeUsers")
+            tab(heading='History')
+                h2 History (last 25)
+                nrtc-table(ng-model="data.history")
