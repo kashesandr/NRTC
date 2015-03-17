@@ -1,10 +1,27 @@
 .row
     .col-md-8.col-md-offset-2
         h1 Time Control
-        tabset
-            tab(heading='Current Users')
-                h2 Current Users
-                nrtc-table(ng-model="data.activeUsers")
-            tab(heading='History')
-                h2 History (last 25)
-                nrtc-table(ng-model="data.history")
+        .row
+            .col-md-12
+                table.table.table-striped.table-bordered.table-hover.table-condensed
+                    thead
+                        th Code
+                        th Status
+                        th Enter Time
+                        th Exit Time
+                        th Duration (minutes)
+                        th Price
+                    tbody
+                        tr(ng-repeat="card in data | orderBy:'timeExit':true")
+                            td {{card.code}}
+                            td
+                                span.label(ng-class="{'true':'label-success','false':'label-default'}[card.isOnline]")
+                                    | {{ {'true':'Online', 'false':'Offline'}[card.isOnline] }}
+                            td {{card.timeEnter | amDateFormat:'HH:mm:ss (MMMM D YYYY)'}}
+                            td {{card.timeExit | amDateFormat:'HH:mm:ss (MMMM D YYYY)'}}
+                            td
+                                span.label(ng-class="{'true':'label-success','false':'label-default'}[card.isOnline]")
+                                    | {{card.durationInMinutes}}
+                            td
+                                span.label(ng-class="{'true':'label-success','false':'label-default'}[card.isOnline]")
+                                    | {{card.price}}
