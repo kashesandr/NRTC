@@ -1,8 +1,7 @@
 nrtc = angular.module 'NRTC'
 
-nrtc.controller "nrtcController", ($scope, GLOBAL_CONFIGS) ->
+nrtc.controller "nrtcController", ($scope, PRICE) ->
     $scope.data = {}
-    PRICE = GLOBAL_CONFIGS.price
     $scope.$on "historyLoaded", (e, data) ->
         data.forEach (card) ->
 

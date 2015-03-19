@@ -22,13 +22,21 @@ module.exports = (baseDir) ->
         gulp.src(dest, {read: false})
         .pipe(clean())
 
+    gulp.task 'clean:extra', ->
+        gulp.src([
+            "#{src}/**/*.js"
+            "#{src}/**/*.html"
+            "#{src}/**/*.css"
+        ], {read: false})
+        .pipe(clean())
+
     gulp.task 'gulpNgConfig', ->
-        gulp.src("./../settings.json")
+        gulp.src("./settings.json")
         .pipe(gulpNgConfig('GlobalConfigs', {
                 createModule: true
                 wrap: true
             }))
-        .pipe(gulp.dest('./src/scripts/services'))
+        .pipe(gulp.dest("./#{baseDir}/src/scripts/services"))
 
     gulp.task 'templateCache', ->
         gulp.src("#{src}/**/*template.jade")
@@ -117,6 +125,7 @@ module.exports = (baseDir) ->
             'copy:js',
             'copy:html',
             'copy:css',
-            'inject'
+            'inject',
+            'clean:extra'
             #'watch'
         )

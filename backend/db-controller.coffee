@@ -1,12 +1,11 @@
 fs = require 'fs'
 Parse = require('node-parse-api').Parse
-Configs = require "./configs"
-GlobalConfigs = JSON.parse fs.readFileSync './../settings.json', 'utf8'
+CONFIGS = JSON.parse fs.readFileSync './settings.json', 'utf8'
 moment = require 'moment'
 
-PARSE = GlobalConfigs.GLOBAL_CONFIGS.parse
+PARSE = CONFIGS.parse
 Parse = new Parse(PARSE.applicationId, PARSE.masterKey)
-TABLE = GlobalConfigs.GLOBAL_CONFIGS.database.table
+TABLE = CONFIGS.database.table
 lock = false
 
 DbController = {}

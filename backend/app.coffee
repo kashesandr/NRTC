@@ -1,9 +1,9 @@
 fs = require 'fs'
 SerialPort = require("serialport").SerialPort
-Configs = require "./configs"
+CONFIGS = JSON.parse fs.readFileSync './settings.json', 'utf8'
 DbController = require './db-controller'
 
-SERIALPORT = Configs.serialport
+SERIALPORT = CONFIGS.serialport
 
 serialPort = new SerialPort SERIALPORT.path, SERIALPORT.options
 
@@ -23,4 +23,4 @@ onData = (d) ->
         console.log "Data Received: '#{code}'"
         DbController.historyLog code
         code = ''
-    , Configs.timeout
+    , CONFIGS.chunksReceiveTimeout

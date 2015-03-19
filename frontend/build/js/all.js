@@ -9538,9 +9538,13 @@ angular.module("ui.bootstrap",["ui.bootstrap.tpls","ui.bootstrap.transition","ui
   var nrtc;
 
   nrtc = angular.module('NRTC', ['parse-angular', 'angularMoment', 'ui.bootstrap', 'GlobalConfigs']).config(function(GLOBAL_CONFIGS) {
-    var parseConfigs;
-    parseConfigs = GLOBAL_CONFIGS.parse;
-    return Parse.initialize(parseConfigs.applicationId, parseConfigs.javascriptKey);
+    var PARSE_CONFIGS;
+    PARSE_CONFIGS = GLOBAL_CONFIGS.parse;
+    return Parse.initialize(PARSE_CONFIGS.applicationId, PARSE_CONFIGS.javascriptKey);
+  }).constant('PRICE', {
+    "discountPeriodInMinutes": 60,
+    "priceBefore": 2,
+    "priceAfter": 1
   }).run(function($rootScope, dataService) {
     dataService.getHistory();
     return window.setInterval(function() {
@@ -9555,10 +9559,8 @@ angular.module("ui.bootstrap",["ui.bootstrap.tpls","ui.bootstrap.transition","ui
 
   nrtc = angular.module('NRTC');
 
-  nrtc.controller("nrtcController", function($scope, GLOBAL_CONFIGS) {
-    var PRICE;
+  nrtc.controller("nrtcController", function($scope, PRICE) {
     $scope.data = {};
-    PRICE = GLOBAL_CONFIGS.price;
     return $scope.$on("historyLoaded", function(e, data) {
       data.forEach(function(card) {
         var durationInMinutes, price;
@@ -9595,11 +9597,11 @@ angular.module("ui.bootstrap",["ui.bootstrap.tpls","ui.bootstrap.transition","ui
   nrtc = angular.module('NRTC');
 
   nrtc.factory("dataService", function($rootScope, GLOBAL_CONFIGS) {
-    var dbConfigs, exports, getHistory;
-    dbConfigs = GLOBAL_CONFIGS.database;
+    var DB_CONFIGS, exports, getHistory;
+    DB_CONFIGS = GLOBAL_CONFIGS.database;
     getHistory = function(count) {
       var query;
-      query = new Parse.Query(dbConfigs.table.history);
+      query = new Parse.Query(DB_CONFIGS.table.history);
       return query.limit(count || 10).find({
         success: function(data) {
           return $rootScope.$broadcast('historyLoaded', data.map(function(item) {
@@ -9625,7 +9627,7 @@ angular.module("ui.bootstrap",["ui.bootstrap.tpls","ui.bootstrap.transition","ui
 
 (function () { 
  return angular.module('GlobalConfigs', [])
-.constant('GLOBAL_CONFIGS', {"parse":{"applicationId":"2Wmev3bHSMdsvl7vfJKVWSl9VcMvg5dU1uGVBeMO","javascriptKey":"g7N28dVW3zroZBa8tjEpfNQQtRNyMVym0PeEVEr4","masterKey":"uFN4al7t0UzbjvYQ2Yv54Y67aHsXqxd6IchyR6RK"},"database":{"table":{"history":"History","tags":"Tags"}},"price":{"discountPeriodInMinutes":60,"priceBefore":2,"priceAfter":1}});
+.constant('GLOBAL_CONFIGS', {"parse":{"applicationId":"","javascriptKey":"","masterKey":""},"database":{"table":{"history":"History","tags":"Tags"}}});
 
 })();
 

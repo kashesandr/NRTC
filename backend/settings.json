@@ -1,0 +1,9 @@
+{
+    "serialport": {
+        "options": {},
+        "path": "COM4"
+    },
+    "chunksReceiveTimeout": 100,
+    "parse": {"applicationId":"","javascriptKey":"","masterKey":""},
+    "database": {"table":{"history":"History","tags":"Tags"}}
+}
