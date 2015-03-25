@@ -14,7 +14,7 @@ nrtc = angular
 .run( ($rootScope, dataService) ->
     dataService.getHistory()
     window.setInterval ->
-        dataService.getHistory(25)
+        dataService.getHistory(100)
     , 1000
 
 )

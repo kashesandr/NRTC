@@ -7,6 +7,7 @@ nrtc.factory "dataService", ($rootScope, GLOBAL_CONFIGS) ->
         query.limit(count || 10).find({
             success: (data) ->
                 $rootScope.$broadcast 'historyLoaded', data.map((item)->
+                    updatedAt: item.updatedAt
                     code: item.get 'code'
                     id: item.id
                     timeEnter: item.get 'timeEnter'
