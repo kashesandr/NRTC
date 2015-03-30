@@ -1,4 +1,4 @@
 # NRTC
 nodejs rfid time controller
 
-Not yet finished.
+Version 0.0.1
