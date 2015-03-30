@@ -1,6 +1,6 @@
 {
   "name": "nodejs rfid time controller",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "homepage": "https://github.com/kashesandr/NRTC",
   "authors": [
     "kashesandr"
