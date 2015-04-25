@@ -14,7 +14,7 @@ wrap = require 'gulp-wrap'
 gulpNgConfig = require "gulp-ng-config"
 fs = require "fs"
 replace = require "gulp-replace"
-istanbul = require 'gulp-istanbul'
+istanbul = require 'gulp-coffee-istanbul'
 mocha = require 'gulp-mocha'
 CONFIGS = JSON.parse fs.readFileSync './settings.json', 'utf8'
 GLOBAL_CONFIGS = CONFIGS.GLOBAL_CONFIGS
@@ -156,13 +156,26 @@ gulp.task 'default', () ->
         #'watch'
     )
 
-gulp.task 'test', ->
+gulp.task 'test:sanity', ->
+    # sanity check
+    gulp.src ["#{testPath}/sanity.coffee"]
+    .pipe mocha reporter: 'list'
 
+gulp.task 'test:backend', ->
     # test backend
     gulp.src ["#{backendSrc}/**/*.coffee"]
     .pipe istanbul {includeUntested: true}
     .pipe istanbul.hookRequire()
     .on 'finish', ->
         gulp.src ["#{testBackend}/**/*.coffee"]
-        .pipe mocha reporter: 'spec'
-        .pipe istanbul.writeReports() # Creating the reports after tests run
+        .pipe mocha reporter: 'list'
+        #.pipe istanbul.writeReports()
+
+gulp.task 'test:frontend', ->
+    # not yet
+
+gulp.task 'test', ->
+    runSequence 'test:sanity', [
+        'test:backend'
+        #'test:frontend'
+    ]

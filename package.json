@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "gulp-coffee-istanbul": "^0.7.0",
-    "gulp-mocha": "^2.0.1"
+    "gulp-mocha": "^2.0.1",
+    "should": "^6.0.1"
   }
 }

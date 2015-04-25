@@ -1,4 +1,6 @@
+assert = require "assert"
+should = require "should"
 
 describe "Sanity check", ->
-  it 'works', ->
-    (true).should.equal true
+  it 'OK', ->
+    true.should.equal true
