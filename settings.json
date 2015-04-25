@@ -8,7 +8,8 @@
     "database": {
       "table": {
         "history": "History",
-        "tags": "Tags"
+        "tags": "Tags",
+        "logs": "Logs"
       }
     }
   }

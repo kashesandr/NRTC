@@ -6,16 +6,10 @@ DbController = require './db-controller'
 SERIALPORT = CONFIGS.serialport
 
 serialPort = new SerialPort SERIALPORT.path, SERIALPORT.options
-
-serialPort.on 'open', ->
-    console.log "Serial port opened on #{SERIALPORT.path}"
-    serialPort.on 'data', onData
-
-serialPort.on 'error', (error) ->
-    console.log "Error occurred: #{error}"
-
 code = ''
-timer = {}
+timer = null
+
+
 onData = (d) ->
     code += d.toString('hex')
     clearTimeout(timer) if timer
@@ -24,3 +18,10 @@ onData = (d) ->
         DbController.historyLog code
         code = ''
     , CONFIGS.chunksReceiveTimeout
+
+serialPort.on 'open', ->
+    console.log "Serial port opened on #{SERIALPORT.path}"
+    serialPort.on 'data', onData
+
+serialPort.on 'error', (error) ->
+    console.log "Error occurred: #{error}"

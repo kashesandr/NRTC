@@ -14,19 +14,37 @@ wrap = require 'gulp-wrap'
 gulpNgConfig = require "gulp-ng-config"
 fs = require "fs"
 replace = require "gulp-replace"
+istanbul = require 'gulp-istanbul'
+mocha = require 'gulp-mocha'
 CONFIGS = JSON.parse fs.readFileSync './settings.json', 'utf8'
+GLOBAL_CONFIGS = CONFIGS.GLOBAL_CONFIGS
 
-frontendSrc = "frontend/src"
-frontendDest = "frontend/build"
 bowerPath = "bower_components"
+srcPath = "src"
+buildPath = "build"
+testPath = "test"
+frontendPath = "frontend"
+backendPath = "backend"
+frontendSrc =   "#{srcPath}/#{frontendPath}"
+frontendDest =  "#{buildPath}/#{frontendPath}"
+testFrontend =  "#{testPath}/#{frontendPath}"
+backendSrc =    "#{srcPath}/#{backendPath}"
+backendDest =   "#{buildPath}/#{backendPath}"
+testBackend =   "#{testPath}/#{backendPath}"
+appName = "NRTC"
 
 gulp.task "server-side", ->
     gulp.src([
-        "./backend/settings.json"
+        "#{backendSrc}/**/*"
     ])
-    .pipe(replace(/"parse": \{(.*)\}/, "\"parse\": #{JSON.stringify CONFIGS.GLOBAL_CONFIGS.parse}"))
-    .pipe(replace(/"database": \{(.*)\}/, "\"database\": #{JSON.stringify CONFIGS.GLOBAL_CONFIGS.database}"))
-    .pipe(gulp.dest("./backend"))
+    .pipe(
+      gulpif("settings.json",
+        replace(/"parse": \{(.*)\}/, "\"parse\": #{JSON.stringify GLOBAL_CONFIGS.parse}"),
+        replace(/"database": \{(.*)\}/, "\"database\": #{JSON.stringify GLOBAL_CONFIGS.database}")
+        )
+    )
+    .pipe(gulpif("*.coffee",coffee()))
+    .pipe(gulp.dest(backendDest))
 
 gulp.task 'clean:build', ->
     gulp.src(frontendDest, {read: false})
@@ -56,7 +74,7 @@ gulp.task 'templateCache', ->
                 """
                     (function() {
                         'use strict';
-                        angular.module('NRTC').run(function($templateCache) {
+                        angular.module('#{appName}').run(function($templateCache) {
                 """
             templateFooter:
                 """
@@ -138,3 +156,13 @@ gulp.task 'default', () ->
         #'watch'
     )
 
+gulp.task 'test', ->
+
+    # test backend
+    gulp.src ["#{backendSrc}/**/*.coffee"]
+    .pipe istanbul {includeUntested: true}
+    .pipe istanbul.hookRequire()
+    .on 'finish', ->
+        gulp.src ["#{testBackend}/**/*.coffee"]
+        .pipe mocha reporter: 'spec'
+        .pipe istanbul.writeReports() # Creating the reports after tests run

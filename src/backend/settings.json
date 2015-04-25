@@ -1,0 +1,9 @@
+{
+    "serialport": {
+        "options": {},
+        "path": "COM3"
+    },
+    "chunksReceiveTimeout": 250,
+    "parse": {"applicationId":"pTdFnP419voIpF3g2WW8gXR7rAGUnPZHMRPxHCPM","javascriptKey":"acF7kdoE5MdPHOlNVlK8295E23TAK1yc0CzVnv5V","masterKey":"mGpphj93gBhI0XUFXshwLGyJn9nnRQd876hcyHYP"},
+    "database": {"table":{"history":"History","tags":"Tags","logs":"Logs"}}
+}

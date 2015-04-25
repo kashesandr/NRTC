@@ -45,5 +45,8 @@
     "run-sequence": "~1.0.2",
     "serialport": "1.6.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "gulp-coffee-istanbul": "^0.7.0",
+    "gulp-mocha": "^2.0.1"
+  }
 }
