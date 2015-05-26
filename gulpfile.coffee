@@ -27,10 +27,8 @@ frontendPath = "frontend"
 backendPath = "backend"
 frontendSrc =   "#{srcPath}/#{frontendPath}"
 frontendDest =  "#{buildPath}/#{frontendPath}"
-testFrontend =  "#{testPath}/#{frontendPath}"
 backendSrc =    "#{srcPath}/#{backendPath}"
 backendDest =   "#{buildPath}/#{backendPath}"
-testBackend =   "#{testPath}/#{backendPath}"
 appName = "NRTC"
 
 gulp.task "server-side", ->
@@ -156,26 +154,21 @@ gulp.task 'default', () ->
         #'watch'
     )
 
-gulp.task 'test:sanity', ->
-    # sanity check
-    gulp.src ["#{testPath}/sanity.coffee"]
-    .pipe mocha reporter: 'list'
-
 gulp.task 'test:backend', ->
     # test backend
-    gulp.src ["#{backendSrc}/**/*.coffee"]
-    .pipe istanbul {includeUntested: true}
-    .pipe istanbul.hookRequire()
-    .on 'finish', ->
-        gulp.src ["#{testBackend}/**/*.coffee"]
-        .pipe mocha reporter: 'list'
-        #.pipe istanbul.writeReports()
+    gulp.src "#{backendSrc}/**/*-test.coffee"
+    .pipe mocha
+        clearRequireCache: true
+        ignoreLeaks: true
+        reporter: 'list'
 
 gulp.task 'test:frontend', ->
     # not yet
 
 gulp.task 'test', ->
-    runSequence 'test:sanity', [
+    runSequence(
+      [
         'test:backend'
-        #'test:frontend'
-    ]
+        'test:frontend'
+      ]
+    )
