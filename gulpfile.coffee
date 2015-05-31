@@ -37,8 +37,8 @@ gulp.task "server-side", ->
     ])
     .pipe(
       gulpif("settings.json",
-        replace(/"parse": \{(.*)\}/, "\"parse\": #{JSON.stringify GLOBAL_CONFIGS.parse}"),
-        replace(/"database": \{(.*)\}/, "\"database\": #{JSON.stringify GLOBAL_CONFIGS.database}")
+        replace(/"PARSE": \{(.*)\}/, "\"PARSE\": #{JSON.stringify GLOBAL_CONFIGS.parse}"),
+        replace(/"DATABASE": \{(.*)\}/, "\"DATABASE\": #{JSON.stringify GLOBAL_CONFIGS.database}")
         )
     )
     .pipe(gulpif("*.coffee",coffee()))
