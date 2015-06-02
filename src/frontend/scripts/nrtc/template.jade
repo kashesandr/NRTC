@@ -1,7 +1,13 @@
 .container-fluid
     .row
         .col-md-10.col-md-offset-1
-            h1 Time Manager
+
+            .row
+                .col-md-12
+                    h1
+                        span.pull-left Time Manager
+                        button.btn.btn-primary.pull-right(ng-click="editMode=!editMode") Edit Mode
+
             table.table.table-striped.table-bordered.table-hover.table-condensed
                 thead
                     th #
@@ -11,6 +17,7 @@
                     th Exit Time
                     th Duration (minutes)
                     th Price
+                    th(ng-if="editMode") Action
                 tbody
                     tr(ng-repeat="card in data | orderBy:['isOnline','updatedAt']:true")
                         td {{$index+1}}
@@ -26,3 +33,5 @@
                         td
                             .label(ng-class="{'true':'label-success','false':'label-info'}[card.isOnline]")
                                 | {{card.price}}
+                        td(ng-if="editMode")
+                            button.btn.btn-danger(ng-click="cardDelete(card.id)") Delete
