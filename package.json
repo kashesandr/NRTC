@@ -42,6 +42,7 @@
     "gulp-wrap": "~0.11.0",
     "moment": "^2.9.0",
     "node-parse-api": "~0.3.5",
+    "q": "^1.4.1",
     "run-sequence": "~1.0.2",
     "serialport": "1.6.1",
     "winston": "^1.0.0"

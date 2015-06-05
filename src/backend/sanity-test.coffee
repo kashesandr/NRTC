@@ -1,7 +1,7 @@
 require 'coffee-script'
 should = require "should"
 
-describe 'sanity check', ->
+describe 'Sanity check', ->
   it 'passed', ->
     (true).should.equal true
 
