@@ -4,7 +4,7 @@ chai = require 'chai'
 expect = chai.expect
 async = require 'async'
 
-Rfid = require './rfid'
+Rfid = require './controller'
 
 class SerialportMock
   constructor: () ->

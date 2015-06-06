@@ -2,7 +2,7 @@ fs = require 'fs'
 path = require "path"
 winston = require 'winston'
 Parse = require('node-parse-api').Parse
-CONFIGS = JSON.parse fs.readFileSync (path.join(__dirname,'./settings.json')), 'utf8'
+CONFIGS = JSON.parse fs.readFileSync (path.join(__dirname,'..','settings.json')), 'utf8'
 moment = require 'moment'
 
 PARSE_CONFIGS = CONFIGS.PARSE

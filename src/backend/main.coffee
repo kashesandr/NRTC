@@ -3,9 +3,8 @@ path = require "path"
 winston = require 'winston'
 serialPort = require 'serialport'
 CONFIGS = JSON.parse fs.readFileSync (path.join(__dirname,'./settings.json')), 'utf8'
-DbController = require './db-controller'
-Rfid = require './rfid'
-Q = require 'q'
+DbController = require './data-storage/controller'
+Rfid = require './rfid/controller'
 
 PNP_ID_REGEXP = new RegExp CONFIGS.SERIALPORT.PNP_ID_REGEXP, 'g'
 CHUNKS_TIMEOUT = CONFIGS.CHUNKS_TIMEOUT
