@@ -48,6 +48,8 @@
     "winston": "^1.0.0"
   },
   "devDependencies": {
+    "async": "^1.2.0",
+    "chai": "^3.0.0",
     "gulp-mocha": "^2.0.1",
     "should": "^6.0.1"
   }

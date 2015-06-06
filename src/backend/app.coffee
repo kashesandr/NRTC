@@ -11,8 +11,8 @@ PNP_ID_REGEXP = new RegExp CONFIGS.SERIALPORT.PNP_ID_REGEXP, 'g'
 CHUNKS_TIMEOUT = CONFIGS.CHUNKS_TIMEOUT
 
 rfidConfigs =
-    _pnpIdRegexp: PNP_ID_REGEXP
-    _chunksTimeout: CHUNKS_TIMEOUT
+    pnpIdRegexp: PNP_ID_REGEXP
+    chunksTimeout: CHUNKS_TIMEOUT
 
 rfid = new Rfid rfidConfigs
 rfid.run()
