@@ -18,7 +18,7 @@ class SerialportMock
 
 describe 'Rfid', ->
 
-  it 'class should exist', ->
+  it 'should exist', ->
     Rfid.should.exists
 
   describe 'should', ->
@@ -35,35 +35,37 @@ describe 'Rfid', ->
       expect(rfid._pnpIdRegexp).to.deep.equal new RegExp('pnp', 'g')
       rfid._chunksTimeout.should.equal 250
 
-    it 'have method run', ->
-      rfid.run.should.exists
+    describe 'have working method', ->
 
-    it 'have method _findComName', (done) ->
+      xit 'run', ->
+        rfid.run.should.exists
 
-      rfid._findComName.should.exists
+      it 'findComName', (done) ->
 
-      serialport = new SerialportMock()
+        rfid._findComName.should.exists
 
-      async.parallel(
-        [
-          (callback) ->
-            rfid._findComName(serialport, new RegExp("PL2303", 'g'))
-            .then (comName) -> callback null, comName
-          (callback) ->
-            rfid._findComName(serialport, new RegExp("PL2304", 'g'))
-            .then (comName) -> callback null, comName
-          (callback) ->
-            rfid._findComName(serialport, new RegExp("pnp", 'g'))
-            .catch (error) -> callback null, error
-        ], (error, results) ->
-          results[0].should.equal 'COM1'
-          results[1].should.equal 'COM2'
-          expect(results[2]).to.deep.equal "No serialports found with pnp like: /pnp/g"
+        serialport = new SerialportMock()
+
+        async.parallel(
+          [
+            (callback) ->
+              rfid._findComName(serialport, new RegExp("PL2303", 'g'))
+              .then (comName) -> callback null, comName
+            (callback) ->
+              rfid._findComName(serialport, new RegExp("PL2304", 'g'))
+              .then (comName) -> callback null, comName
+            (callback) ->
+              rfid._findComName(serialport, new RegExp("pnp", 'g'))
+              .catch (error) -> callback null, error
+          ], (error, results) ->
+            results[0].should.equal 'COM1'
+            results[1].should.equal 'COM2'
+            expect(results[2]).to.deep.equal "No serialports found with pnp like: /pnp/g"
+            done()
+        )
+
+      it 'onDataReceive', (done) ->
+        rfid.onDataReceive.should.exists
+        rfid.onDataReceive('123').then (d) ->
+          d.should.equal '123'
           done()
-      )
-
-    it 'have method onDataReceive', (done) ->
-      rfid.onDataReceive.should.exists
-      rfid.onDataReceive('123').then (d) ->
-        d.should.equal '123'
-        done()

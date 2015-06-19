@@ -4,44 +4,52 @@ winston = require 'winston'
 Parse = require('node-parse-api').Parse
 CONFIGS = JSON.parse fs.readFileSync (path.join(__dirname,'..','settings.json')), 'utf8'
 moment = require 'moment'
+Q = require 'q'
 
 PARSE_CONFIGS = CONFIGS.PARSE
-ParseInstance = new Parse(PARSE_CONFIGS.applicationId, PARSE_CONFIGS.masterKey)
 TABLE = CONFIGS.DATABASE.table
-lock = false
 
-DbController = {}
+parseInstance = new Parse PARSE_CONFIGS.applicationId, PARSE_CONFIGS.masterKey
 
-DbController.insert = (table, what) ->
-    return if lock is true
-    lock = true
-    ParseInstance.insert table, what, (error, response) ->
-        return winston.error "Parse: Error occurred when inserting data to Parse: #{error}" if error
-        winston.info "Parse: Data inserted into the '#{table}' table"
-        lock = false
+DataStorage = {}
 
-DbController.update = (table, objectId, data) ->
-    return if lock is true
-    lock = true
-    ParseInstance.update table, objectId, data, (error) ->
-        return winston.error "Parse: Error when update() in the table '#{table}': #{error}" if error
-        winston.info "Parse: Data updated in the '#{table}' table"
-        lock = false
+DataStorage.insert = (table, data) ->
+    deferred = Q.defer()
+    parseInstance.insert table, data, (error, response) ->
+        if error
+            winston.error "DataStorage: Error when inserting data: #{error}"
+            deferred.reject error
+        winston.info "DataStorage: Data inserted into the '#{table}' table"
+        deferred.resolve response
 
-DbController.historyLog = (code) ->
+DataStorage.update = (table, objectId, data) ->
+    deferred = Q.defer()
+    parseInstance.update table, objectId, data, (error, response) ->
+        if error
+            winston.error "DataStorage: Error when updating data: #{error}"
+            deferred.reject error
+        winston.info "DataStorage: Data updated in the '#{table}' table"
+        deferred.resolve response
+
+DataStorage.historyLog = (code) ->
     table = TABLE.history
     now = moment().toDate()
-    ParseInstance.find table, {code: code, timeExit: null}, (error, response) ->
+    parseInstance.find table, {code: code, timeExit: null}, (error, response) ->
         winston.error "Parse: Error when historyLog(): #{error}" if error
         result = response?.results?[0] || null
         if (result)
-            DbController.update table, result.objectId,
+            DataStorage.update table, result.objectId,
                 code: result.code
                 timeExit: now
         else
-            DbController.insert table,
+            DataStorage.insert table,
                 code: code
                 timeEnter: now
                 timeExit: null
 
-module.exports = DbController
+DataStorage.log = (code) ->
+
+DataStorage.createUser = (code) ->
+
+
+module.exports = DataStorage

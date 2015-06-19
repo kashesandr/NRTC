@@ -20,15 +20,16 @@ CONFIGS = JSON.parse fs.readFileSync './settings.json', 'utf8'
 GLOBAL_CONFIGS = CONFIGS.GLOBAL_CONFIGS
 
 bowerPath = "bower_components"
-srcPath = "src"
-buildPath = "build"
-testPath = "test"
+
+rootSrcPath = "src"
+rootBuildPath = "build"
 frontendPath = "frontend"
 backendPath = "backend"
-frontendSrc =   "#{srcPath}/#{frontendPath}"
-frontendDest =  "#{buildPath}/#{frontendPath}"
-backendSrc =    "#{srcPath}/#{backendPath}"
-backendDest =   "#{buildPath}/#{backendPath}"
+
+frontendSrc =   "#{rootSrcPath}/#{frontendPath}"
+frontendDest =  "#{rootBuildPath}/#{frontendPath}"
+backendSrc =    "#{rootSrcPath}/#{backendPath}"
+backendDest =   "#{rootBuildPath}/#{backendPath}"
 appName = "NRTC"
 
 gulp.task "server-side", ->
@@ -156,7 +157,7 @@ gulp.task 'default', () ->
 
 gulp.task 'test:backend', ->
     # test backend
-    gulp.src "#{backendSrc}/**/*-test.coffee"
+    gulp.src "#{backendSrc}/**/test.coffee"
     .pipe mocha
         clearRequireCache: true
         ignoreLeaks: true
