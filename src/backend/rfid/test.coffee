@@ -37,15 +37,12 @@ describe 'Rfid', ->
 
     describe 'have working method', ->
 
-      xit 'run', ->
+      it 'run', ->
         rfid.run.should.exists
 
       it 'findComName', (done) ->
-
         rfid._findComName.should.exists
-
         serialport = new SerialportMock()
-
         async.parallel(
           [
             (callback) ->

@@ -1,6 +1,6 @@
 fs = require 'fs'
 path = require "path"
-winston = require 'winston'
+logger = require './../logger'
 Parse = require('node-parse-api').Parse
 CONFIGS = JSON.parse fs.readFileSync (path.join(__dirname,'..','settings.json')), 'utf8'
 moment = require 'moment'
@@ -17,25 +17,25 @@ DataStorage.insert = (table, data) ->
     deferred = Q.defer()
     parseInstance.insert table, data, (error, response) ->
         if error
-            winston.error "DataStorage: Error when inserting data: #{error}"
+            logger.error "DataStorage: Error when inserting data: #{error}"
             deferred.reject error
-        winston.info "DataStorage: Data inserted into the '#{table}' table"
+        logger.info "DataStorage: Data inserted into the '#{table}' table"
         deferred.resolve response
 
 DataStorage.update = (table, objectId, data) ->
     deferred = Q.defer()
     parseInstance.update table, objectId, data, (error, response) ->
         if error
-            winston.error "DataStorage: Error when updating data: #{error}"
+            logger.error "DataStorage: Error when updating data: #{error}"
             deferred.reject error
-        winston.info "DataStorage: Data updated in the '#{table}' table"
+        logger.info "DataStorage: Data updated in the '#{table}' table"
         deferred.resolve response
 
 DataStorage.historyLog = (code) ->
     table = TABLE.history
     now = moment().toDate()
     parseInstance.find table, {code: code, timeExit: null}, (error, response) ->
-        winston.error "Parse: Error when historyLog(): #{error}" if error
+        logger.error "Parse: Error when historyLog(): #{error}" if error
         result = response?.results?[0] || null
         if (result)
             DataStorage.update table, result.objectId,

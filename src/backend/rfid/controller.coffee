@@ -1,4 +1,4 @@
-winston = require 'winston'
+logger = require './../logger'
 serialPort = require 'serialport'
 Q = require 'q'
 
@@ -28,22 +28,22 @@ class Rfid
             @_rfidReader = new SerialPort @comName, @serialPortOptions
 
             if not @_rfidReader
-                return winston.error "Cannot create serialPort"
+                return logger.error "Cannot create serialPort"
 
             @addEvents()
 
     addEvents: ->
 
         @_rfidReader.on 'open', =>
-            winston.info "Serial port #{@comName} opened"
+            logger.info "Serial port #{@comName} opened"
 
         @_rfidReader.on 'data', @onDataReceive
 
         @_rfidReader.on 'error', (error) ->
-            winston.error "Error on port #{@comName} occurred: #{error}"
+            logger.error "Error on port #{@comName} occurred: #{error}"
 
         @_rfidReader.on 'close', =>
-            winston.info "Serial port #{@comName} closed."
+            logger.info "Serial port #{@comName} closed."
 
     onDataReceive: (d = '') =>
         deferred = Q.defer()
@@ -52,7 +52,7 @@ class Rfid
         clearTimeout @_timer if @_timer
 
         @_timer = setTimeout =>
-            winston.info "Data Received from the reader: '#{@_code}'"
+            logger.info "Data Received from the reader: '#{@_code}'"
             deferred.resolve @_code
             @_code = ''
         , @_chunksTimeout
@@ -66,7 +66,7 @@ class Rfid
 
             if error
                 msg = "Error occured when listing serialports: #{error}"
-                winston.error msg
+                logger.error msg
                 deferred.reject msg
 
             for i in [0..ports.length]
@@ -75,7 +75,7 @@ class Rfid
                     return deferred.resolve port.comName
 
             msg = "No serialports found with pnp like: #{pnpIdRegexp}"
-            winston.error msg
+            logger.error msg
             deferred.reject msg
 
         deferred.promise
