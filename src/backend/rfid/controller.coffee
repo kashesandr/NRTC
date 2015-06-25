@@ -1,4 +1,4 @@
-logger = require './../logger'
+logger = require './../tools/logger'
 serialPort = require 'serialport'
 Q = require 'q'
 

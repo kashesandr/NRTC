@@ -14,7 +14,6 @@ wrap = require 'gulp-wrap'
 gulpNgConfig = require "gulp-ng-config"
 fs = require "fs"
 replace = require "gulp-replace"
-istanbul = require 'gulp-coffee-istanbul'
 mocha = require 'gulp-mocha'
 CONFIGS = JSON.parse fs.readFileSync './settings.json', 'utf8'
 GLOBAL_CONFIGS = CONFIGS.GLOBAL_CONFIGS
@@ -35,6 +34,7 @@ appName = "NRTC"
 gulp.task "server-side", ->
     gulp.src([
         "#{backendSrc}/**/*"
+        "!#{backendSrc}/**/test.coffee"
     ])
     .pipe(
       gulpif("settings.json",

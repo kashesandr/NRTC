@@ -1,55 +1,96 @@
 fs = require 'fs'
 path = require "path"
-logger = require './../logger'
+logger = require './../tools/logger'
 Parse = require('node-parse-api').Parse
-CONFIGS = JSON.parse fs.readFileSync (path.join(__dirname,'..','settings.json')), 'utf8'
-moment = require 'moment'
 Q = require 'q'
 
-PARSE_CONFIGS = CONFIGS.PARSE
-TABLE = CONFIGS.DATABASE.table
+class DataStorage
 
-parseInstance = new Parse PARSE_CONFIGS.applicationId, PARSE_CONFIGS.masterKey
+    constructor: (configs) ->
+        @parseConfigs = configs.parse
+        @table = configs.table
+        @parseInstance = new Parse(
+            @parseConfigs.applicationId,
+            @parseConfigs.masterKey
+        )
 
-DataStorage = {}
+    ###
+    table = 'SomeTable'
+    data = {key: 'value'}
+    returns promise
+    ###
+    insert: (table, data) ->
+        deferred = Q.defer()
+        @parseInstance.insert table, data, (error, response) ->
+            deferred.reject "Error when inserting data: #{error}" if error
+            deferred.resolve response?.objectId or null
+        deferred.promise
 
-DataStorage.insert = (table, data) ->
-    deferred = Q.defer()
-    parseInstance.insert table, data, (error, response) ->
-        if error
-            logger.error "DataStorage: Error when inserting data: #{error}"
-            deferred.reject error
-        logger.info "DataStorage: Data inserted into the '#{table}' table"
-        deferred.resolve response
+    ###
+    table = 'SomeTable'
+    query = {...}, e.g. {objectId: 'lalala'}
+    returns promise
+    ###
+    find: (table, query) ->
+        deferred = Q.defer()
+        @parseInstance.find table, query, (error, response) ->
+            deferred.reject "Error when inserting data: #{error}" if error
+            deferred.resolve response?.results or []
+        deferred.promise
 
-DataStorage.update = (table, objectId, data) ->
-    deferred = Q.defer()
-    parseInstance.update table, objectId, data, (error, response) ->
-        if error
-            logger.error "DataStorage: Error when updating data: #{error}"
-            deferred.reject error
-        logger.info "DataStorage: Data updated in the '#{table}' table"
-        deferred.resolve response
+    ###
+    table = 'SomeTable'
+    objectId = 'lalala'
+    data = {...}, e.g. {action: 'update'}
+    ###
+    update: (table, objectId, data) ->
+        deferred = Q.defer()
+        @parseInstance.update table, objectId, data, (error, response) ->
+            deferred.reject "Error when updating data: #{error}" if error
+            deferred.resolve data
+        deferred.promise
 
-DataStorage.historyLog = (code) ->
-    table = TABLE.history
-    now = moment().toDate()
-    parseInstance.find table, {code: code, timeExit: null}, (error, response) ->
-        logger.error "Parse: Error when historyLog(): #{error}" if error
-        result = response?.results?[0] || null
-        if (result)
-            DataStorage.update table, result.objectId,
-                code: result.code
-                timeExit: now
-        else
-            DataStorage.insert table,
-                code: code
-                timeEnter: now
-                timeExit: null
+    ###
+    table = 'SomeTable'
+    objectId = 'lalala'
+    returns promise
+    ###
+    delete: (table, objectId) ->
+        deferred = Q.defer()
+        @parseInstance.delete table, objectId, (error, response) ->
+            deferred.reject "Error when updating data: #{error}" if error
+            deferred.resolve objectId
+        deferred.promise
 
-DataStorage.log = (code) ->
+    log: (code) ->
+        deferred = Q.defer()
 
-DataStorage.createUser = (code) ->
+        @.find('Users', {code: code})
+        .then (results) ->
+            user = results?[0] or null
+            #deferred.resolve user if not user?
 
+
+
+
+        #@createUser(code)
+        #.then (userId) ->
+
+        deferred.promise
+
+
+    createUser: (code) ->
+        user = Parse.Object.extend 'User', {
+            # Instance properties go in an initialize method
+            initialize: (attrs, options) ->
+                this.code = code
+                this.name = ''
+                this.surname = ''
+                this.log = []
+        }, {
+            # Class methods
+        }
+        user.increment('uid')
+        user.save()
 
 module.exports = DataStorage
