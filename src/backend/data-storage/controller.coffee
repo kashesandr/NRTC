@@ -68,18 +68,17 @@ class DataStorage
         @.find('Users', {code: code})
         .then (results) ->
             user = results?[0] or null
-            #deferred.resolve user if not user?
-
-
-
-
-        #@createUser(code)
-        #.then (userId) ->
+            if not user?
+                @createUser(code)
+                .then (_user) ->
+                    deferred.resolve _user
+            else deferred.resolve user
 
         deferred.promise
 
 
     createUser: (code) ->
+        deferred = Q.defer()
         user = Parse.Object.extend 'User', {
             # Instance properties go in an initialize method
             initialize: (attrs, options) ->
@@ -92,5 +91,6 @@ class DataStorage
         }
         user.increment('uid')
         user.save()
+        deferred.promise
 
 module.exports = DataStorage
