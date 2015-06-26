@@ -98,16 +98,32 @@ class DataStorage
 
         deferred.promise
 
-    log: (code) ->
+    destroyAll: (className) ->
         deferred = Q.defer()
 
-        @find('User', [{key:'code',value:code}])
+        query = new Parse.Query(className)
+        query.find()
         .then (results) ->
-            if results?.length is 0
-                @createUser(code)
-                .then (_user) ->
-                    deferred.resolve _user
-            else deferred.resolve results[0]
+            Parse.Object.destroyAll(results)
+        , (error) ->
+            deferred.reject error
+
+        deferred.promise
+
+    log: (className, code) ->
+        deferred = Q.defer()
+
+        Log = Parse.Object.extend className
+        log = new Log()
+
+        @createUser(code)
+        .then (user) ->
+            log.set 'parent', {id: user.id}
+            log.save null,
+                success: (result) ->
+                    deferred.resolve result
+                error: (result, error) ->
+                    deferred.reject error
 
         deferred.promise
 
@@ -117,15 +133,15 @@ class DataStorage
     Input: code = 'blah'
     Returns: a promise of a user object
     ###
-    createUser: (code) ->
+    createUser: (className, code) ->
         deferred = Q.defer()
 
-        @find 'Users', [{key:'code', value:code}]
+        @find className, [{key:'code', value:code}]
         .then (results) ->
 
             return deferred.resolve results[0] if results?.length > 0
 
-            User = Parse.Object.extend 'Users', {
+            User = Parse.Object.extend className, {
                 # Instance properties go in an initialize method
                 initialize: (attrs, options) ->
 
@@ -138,9 +154,9 @@ class DataStorage
             user.set 'logs', []
 
             user.save null,
-                success: (_result) ->
-                    deferred.resolve _result
-                error: (_result, error) ->
+                success: (result) ->
+                    deferred.resolve result
+                error: (result, error) ->
                     deferred.reject error
 
         deferred.promise
