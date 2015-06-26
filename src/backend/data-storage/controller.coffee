@@ -1,96 +1,148 @@
 fs = require 'fs'
 path = require "path"
 logger = require './../tools/logger'
-Parse = require('node-parse-api').Parse
+Parse = require('parse').Parse
 Q = require 'q'
 
 class DataStorage
 
     constructor: (configs) ->
-        @parseConfigs = configs.parse
-        @table = configs.table
-        @parseInstance = new Parse(
-            @parseConfigs.applicationId,
-            @parseConfigs.masterKey
+        Parse.initialize(
+            configs.applicationId,
+            configs.javascriptKey
         )
 
     ###
-    table = 'SomeTable'
-    data = {key: 'value'}
-    returns promise
+    className = 'className'
+    data = {key: value}
+    returns a promise
     ###
-    insert: (table, data) ->
+    insert: (className, data) ->
         deferred = Q.defer()
-        @parseInstance.insert table, data, (error, response) ->
-            deferred.reject "Error when inserting data: #{error}" if error
-            deferred.resolve response?.objectId or null
+        deferred.reject null if not data?
+
+        Object = Parse.Object.extend className
+
+        insert = new Object()
+        insert.save data,
+            success: (result) ->
+                deferred.resolve result.id
+            error: (result, error) ->
+                deferred.reject error
+
         deferred.promise
 
     ###
-    table = 'SomeTable'
-    query = {...}, e.g. {objectId: 'lalala'}
+    className = 'className'
+    id = 'lala'
     returns promise
     ###
-    find: (table, query) ->
+    find: (className, equalToArray) ->
         deferred = Q.defer()
-        @parseInstance.find table, query, (error, response) ->
-            deferred.reject "Error when inserting data: #{error}" if error
-            deferred.resolve response?.results or []
+
+        Object = Parse.Object.extend className
+
+        query = new Parse.Query Object
+        equalToArray.forEach (select) ->
+            {key, value} = select
+            query.equalTo key, value
+
+        query.find().then (results) ->
+            deferred.resolve results
+        , (error) ->
+            deferred.reject error
+
         deferred.promise
 
+    findById: (className, id) ->
+        deferred = Q.defer()
+
+        Object = Parse.Object.extend className
+
+        query = new Parse.Query Object
+        query.get id,
+            success: (result) ->
+                deferred.resolve result
+            error: (result, error) ->
+                deferred.reject error
+
+        deferred.promise
+
+
+
     ###
-    table = 'SomeTable'
-    objectId = 'lalala'
+    className = 'className'
+    id = 'lalala'
     data = {...}, e.g. {action: 'update'}
     ###
-    update: (table, objectId, data) ->
-        deferred = Q.defer()
-        @parseInstance.update table, objectId, data, (error, response) ->
-            deferred.reject "Error when updating data: #{error}" if error
-            deferred.resolve data
-        deferred.promise
+    update: (className, id, data) ->
+        data.id = id
+        @insert className, data
 
     ###
-    table = 'SomeTable'
+    className = 'className'
     objectId = 'lalala'
     returns promise
     ###
-    delete: (table, objectId) ->
+    delete: (className, id) ->
         deferred = Q.defer()
-        @parseInstance.delete table, objectId, (error, response) ->
-            deferred.reject "Error when updating data: #{error}" if error
-            deferred.resolve objectId
+
+        @findById(className, id)
+        .then (result) ->
+            result.destroy
+                success: (_result) ->
+                    deferred.resolve _result.id
+                error: (_result, error) ->
+                    deferred.reject error
+        .catch deferred.reject
+
         deferred.promise
 
     log: (code) ->
         deferred = Q.defer()
 
-        @.find('Users', {code: code})
+        @find('User', [{key:'code',value:code}])
         .then (results) ->
-            user = results?[0] or null
-            if not user?
+            if results?.length is 0
                 @createUser(code)
                 .then (_user) ->
                     deferred.resolve _user
-            else deferred.resolve user
+            else deferred.resolve results[0]
 
         deferred.promise
 
 
+    ###
+    Creates a new user based on code or selects existing user if the code already registered
+    Input: code = 'blah'
+    Returns: a promise of a user object
+    ###
     createUser: (code) ->
         deferred = Q.defer()
-        user = Parse.Object.extend 'User', {
-            # Instance properties go in an initialize method
-            initialize: (attrs, options) ->
-                this.code = code
-                this.name = ''
-                this.surname = ''
-                this.log = []
-        }, {
-            # Class methods
-        }
-        user.increment('uid')
-        user.save()
+
+        @find 'Users', [{key:'code', value:code}]
+        .then (results) ->
+
+            return deferred.resolve results[0] if results?.length > 0
+
+            User = Parse.Object.extend 'Users', {
+                # Instance properties go in an initialize method
+                initialize: (attrs, options) ->
+
+            }, {
+                # Class methods
+            }
+
+            user = new User()
+            user.set 'code', code
+            user.set 'logs', []
+
+            user.save null,
+                success: (_result) ->
+                    deferred.resolve _result
+                error: (_result, error) ->
+                    deferred.reject error
+
         deferred.promise
 
 module.exports = DataStorage
