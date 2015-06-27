@@ -29,9 +29,9 @@ describe 'dataStorage instance', ->
 
     afterEach (done) ->
       Q.all(
-        controller.destroyAll('Test')
-        controller.destroyAll('Users')
-        controller.destroyAll('Logs')
+        controller.deleteAll('Test')
+        controller.deleteAll('Users')
+        controller.deleteAll('Logs')
       ).then done()
 
     it 'insert', (done) ->
@@ -63,8 +63,8 @@ describe 'dataStorage instance', ->
 
       it 'if no entries', (done) ->
         controller.find('Test', [ {key:'action',value:'not-existing'} ])
-        .then (results) ->
-          results.should.have.length 0
+        .catch (result) ->
+          expect(result).to.equal null
           setTimeout done(), 5000
 
     describe 'findById', ->
@@ -82,10 +82,9 @@ describe 'dataStorage instance', ->
 
       it 'if no entries', (done) ->
         controller.findById 'Test', 'not-existing'
-        .catch (error) ->
-          error.code.should.equal 101
+        .catch (result) ->
+          expect(result).to.equal null
           setTimeout done(), 5000
-
 
     describe 'delete', ->
 
@@ -106,8 +105,8 @@ describe 'dataStorage instance', ->
 
       it 'if nothing to delete', (done) ->
         controller.delete('Test', 'not-existing')
-        .catch (error) ->
-          error.code.should.equal 101
+        .catch (result) ->
+          expect(result).to.equal null
           setTimeout done(), 5000
 
     describe 'update', ->
@@ -123,13 +122,13 @@ describe 'dataStorage instance', ->
         .then (id) ->
           controller.findById 'Test', id
         .then (result) ->
-          expect(result.attributes).to.deep.equal {action: 'update'}
+          result.get('action').should.equal 'update'
           setTimeout done(), 5000
 
       it 'if no entries', (done) ->
         controller.update('Test', 'not-existing', {action: 'update'})
-        .catch (error) ->
-          error.code.should.equal 101
+        .catch (result) ->
+          expect(result).to.equal null
           setTimeout done(), 5000
 
 
@@ -138,7 +137,7 @@ describe 'dataStorage instance', ->
       Input: <String> code
       Output: <String> action # enter / exit
     ###
-    describe 'log', ->
+    describe.only 'log', ->
 
       it 'exists', ->
         controller.log.should.exists
@@ -146,10 +145,10 @@ describe 'dataStorage instance', ->
       it 'when a user enters for the first time', (done) ->
 
         controller.log('Logs', 'code')
-        .then (result) ->
-          controller.findById "Users", result.get('parent').id
-        .then (result) ->
-          result.get('code').should.equal 'code'
+        .then (log) ->
+          controller.findById "Users", log.get('parent').id
+        .then (user) ->
+          expect(user.get('code')).to.equal 'code'
           setTimeout done(), 5000
 
       xit 'when a user enters', (done) ->
