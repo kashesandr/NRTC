@@ -19,13 +19,13 @@ class DataStorage
   ###
   insert: (className, data) ->
     deferred = Q.defer()
-    deferred.reject null if not data?
 
     Object = Parse.Object.extend className
     insert = new Object()
+
     insert.save(data)
     .then (result) ->
-      deferred.resolve result.id
+      deferred.resolve result
     , (error) ->
       deferred.reject null
 
@@ -42,15 +42,15 @@ class DataStorage
     Object = Parse.Object.extend className
 
     query = new Parse.Query Object
-    equalToArray.forEach (select) ->
-      {key, value} = select
+    equalToArray.forEach (equalTo) ->
+      {key, value} = equalTo
       query.equalTo key, value
 
-    query.find().then (results) ->
-      deferred.reject null if results?.length is 0
-      deferred.resolve results
+    query.find()
+    .then (results) ->
+      deferred.resolve results or []
     , (error) ->
-      deferred.reject null
+      deferred.resolve []
 
     deferred.promise
 
@@ -62,8 +62,8 @@ class DataStorage
     query.get(id)
     .then (result) ->
       deferred.resolve result
-    , (error) ->
-      deferred.reject null
+    , (result, error) ->
+      deferred.resolve null
 
     deferred.promise
 
@@ -73,15 +73,8 @@ class DataStorage
   data = {...}, e.g. {action: 'update'}
   ###
   update: (className, id, data) ->
-    deferred = Q.defer()
-
     data.id = id
-    @insert(className, data)
-    .then (result) ->
-      deferred.resolve result
-    .catch deferred.reject
-
-    deferred.promise
+    @insert className, data
 
   ###
   className = 'className'
@@ -96,7 +89,7 @@ class DataStorage
       return deferred.resolve null if not result?
       result.destroy()
     .then (result) ->
-      deferred.resolve result.id
+      deferred.resolve result
     , (error) ->
       deferred.reject null
     .catch (error) ->
@@ -116,46 +109,36 @@ class DataStorage
 
     deferred.promise
 
+  ###
+  Log an enter/exit event
+  Input: code = 'blah'
+  Output:
+    - it creates a new user and links the user with the input code
+    - returns a promise (a log object which has a parent attribute)
+  ###
   log: (className, code) ->
-    deferred = Q.defer()
-
-    Log = Parse.Object.extend className
-    log = new Log()
-
-    @createUser('Users', code)
-    .then (user) ->
-      log.set 'parent', {id: user.id}
-      log.save null,
-        success: (result) ->
-          deferred.resolve result
-        error: (result, error) ->
-          deferred.reject null
-
-    deferred.promise
-
+    @getUser 'Users', code
+    .then (user) =>
+      data = parent: {id: user.id}
+      @insert className, data
 
   ###
   Creates a new user based on code or selects existing user if the code already registered
   Input: code = 'blah'
   Returns: a promise of a user object
   ###
-  createUser: (className, code) ->
+  getUser: (className, code) ->
     deferred = Q.defer()
 
     @find className, [{key:'code', value:code}]
-    .then (results) ->
+    .then (results) =>
       deferred.resolve results[0] if results?.length > 0
-    .catch (error) ->
-      User = Parse.Object.extend className
-      user = new User()
-      user.set 'code', code
-      user.set 'logs', []
-
-      user.save null,
-        success: (result) ->
-          deferred.resolve result
-        error: (result, error) ->
-          deferred.reject null
+      data =
+        code: code
+        logs: []
+      @insert className, data
+      .then deferred.resolve
+      .catch deferred.reject
 
     deferred.promise
 

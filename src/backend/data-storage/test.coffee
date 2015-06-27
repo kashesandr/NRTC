@@ -29,23 +29,24 @@ describe 'dataStorage instance', ->
 
     afterEach (done) ->
       Q.all(
-        controller.deleteAll('Test')
-        controller.deleteAll('Users')
-        controller.deleteAll('Logs')
+        #controller.deleteAll('Test')
+        #controller.deleteAll('Users')
+        #controller.deleteAll('Logs')
       ).then done()
 
     it 'insert', (done) ->
+      @timeout 5000
 
       controller.insert.should.exists
 
       controller.insert('Test', {action: 'insert'})
-      .then (id) ->
+      .then (result) ->
         Inserted = Parse.Object.extend 'Test'
         query = new Parse.Query Inserted
-        query.get id,
+        query.get result.id,
           success: (result) ->
-            expect(result.attributes).to.deep.equal {action: 'insert'}
-            setTimeout done(), 5000
+            result.get('action').should.equal 'insert'
+            done()
 
     describe 'find', ->
 
@@ -53,19 +54,21 @@ describe 'dataStorage instance', ->
         controller.find.should.exists
 
       it 'if an entry exists', (done) ->
+        @timeout 5000
 
         controller.insert('Test', {action: 'find'})
-        .then (id) ->
+        .then (result) ->
           controller.find 'Test', [ {key:'action',value:'find'} ]
         .then (results) ->
-          expect(results[0].attributes).to.deep.equal {action: 'find'}
-          setTimeout done(), 5000
+          results[0].get('action').should.equal 'find'
+          done()
 
       it 'if no entries', (done) ->
+        @timeout 5000
         controller.find('Test', [ {key:'action',value:'not-existing'} ])
-        .catch (result) ->
-          expect(result).to.equal null
-          setTimeout done(), 5000
+        .then (results) ->
+          expect(results).to.deep.equal []
+          done()
 
     describe 'findById', ->
 
@@ -73,18 +76,20 @@ describe 'dataStorage instance', ->
         controller.findById.should.exists
 
       it 'if an entry exists', (done) ->
+        @timeout 5000
         controller.insert 'Test', {action:'findById'}
-        .then (id) ->
-          controller.findById 'Test', id
         .then (result) ->
-          expect(result.attributes).to.deep.equal {action:'findById'}
-          setTimeout done(), 5000
+          controller.findById 'Test', result.id
+        .then (result) ->
+          result.get('action').should.equal 'findById'
+          done()
 
       it 'if no entries', (done) ->
+        @timeout 5000
         controller.findById 'Test', 'not-existing'
-        .catch (result) ->
+        .then (result) ->
           expect(result).to.equal null
-          setTimeout done(), 5000
+          done()
 
     describe 'delete', ->
 
@@ -92,22 +97,24 @@ describe 'dataStorage instance', ->
         controller.delete.should.exists
 
       it 'if an entry exists', (done) ->
+        @timeout 5000
 
         _id = null
 
         controller.insert('Test', {action: 'delete'})
-        .then (id) ->
-          _id = id
-          controller.delete 'Test', id
-        .then (id) ->
-          expect(id).to.equal _id
-          setTimeout done(), 5000
+        .then (result) ->
+          _id = result.id
+          controller.delete 'Test', _id
+        .then (result) ->
+          expect(result.id).to.equal _id
+          done()
 
       it 'if nothing to delete', (done) ->
+        @timeout 5000
         controller.delete('Test', 'not-existing')
-        .catch (result) ->
+        .then (result) ->
           expect(result).to.equal null
-          setTimeout done(), 5000
+          done()
 
     describe 'update', ->
 
@@ -115,21 +122,23 @@ describe 'dataStorage instance', ->
         controller.update.should.exists
 
       it 'if an entry exists', (done) ->
+        @timeout 5000
 
         controller.insert('Test', {action: 'pre-update'})
-        .then (id) ->
-          controller.update 'Test', id, {action: 'update'}
-        .then (id) ->
-          controller.findById 'Test', id
+        .then (result) ->
+          controller.update 'Test', result.id, {action: 'update'}
+        .then (result) ->
+          controller.findById 'Test', result.id
         .then (result) ->
           result.get('action').should.equal 'update'
-          setTimeout done(), 5000
+          done()
 
       it 'if no entries', (done) ->
+        @timeout 5000
         controller.update('Test', 'not-existing', {action: 'update'})
         .catch (result) ->
           expect(result).to.equal null
-          setTimeout done(), 5000
+          done()
 
 
     ###
@@ -137,62 +146,68 @@ describe 'dataStorage instance', ->
       Input: <String> code
       Output: <String> action # enter / exit
     ###
-    describe.only 'log', ->
+    describe 'log', ->
 
       it 'exists', ->
         controller.log.should.exists
 
       it 'when a user enters for the first time', (done) ->
+        @timeout 5000
 
-        controller.log('Logs', 'code')
-        .then (log) ->
-          controller.findById "Users", log.get('parent').id
-        .then (user) ->
-          expect(user.get('code')).to.equal 'code'
-          setTimeout done(), 5000
+        controller.log('Logs', 'non-existing-code')
+        .then (result) ->
+          userId = result.get('parent').id
+          controller.findById "Users", userId
+        .then (result) ->
+          expect(result.get('code')).to.equal 'non-existing-code'
+          done()
 
-      xit 'when a user enters', (done) ->
+      xit 'when a user enters next time', (done) ->
+        @timeout 5000
         controller.log('Logs', 'code')
         .then (action) ->
           action.should.equal 'enter'
-          setTimeout done(), 5000
+          done()
 
       xit 'when a user exits', (done) ->
+        @timeout 5000
         # dataStorage logs should already have
         # the entry with action=`enter`
 
         controller.log('Logs', 'code')
         .then (action) ->
           action.should.equal 'exit'
-          setTimeout done(), 5000
+          done()
 
     # input data: <String> code
     # output:
     # 1) returns a created user
     # 2) returns an already existing user with the provided code
-    describe 'createUser', ->
+    describe 'getUser', ->
 
       it 'should exist', ->
-        controller.createUser.should.exists
+        controller.getUser.should.exists
 
       it 'when a user does not exists', (done) ->
+        @timeout 5000
         code = 'a-new-code'
-        controller.createUser('Users', code)
+        controller.getUser('Users', code)
         .then (user) ->
           user.get('code').should.equal code
           expect(user.get 'logs').to.deep.equal []
-          setTimeout done(), 5000
+          done()
 
       it 'when a user exists already', (done) ->
+        @timeout 5000
 
         code = 'an-existing-code'
         _user = null
 
-        controller.createUser('Users', code)
+        controller.getUser('Users', code)
         .then (user) ->
           _user = user
-          controller.createUser('Users', code)
+          controller.getUser('Users', code)
         .then (user) ->
           expect(user.attributes).to.deep.equal _user.attributes
           expect(user.id).to.equal _user.id
-          setTimeout done(), 5000
+          done()
