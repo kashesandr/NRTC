@@ -68,6 +68,33 @@ class DataStorage
     deferred.promise
 
   ###
+  find latest entries inn className
+  Input:
+    className = 'className'
+    count = <number>
+  returns a promise (array of latest entries)
+  ###
+  findLatest: (className, equalToArray = [], limit = 1) ->
+    deferred = Q.defer()
+
+    Object = Parse.Object.extend className
+
+    query = new Parse.Query Object
+    equalToArray.forEach (equalTo) ->
+      {key, value} = equalTo
+      query.equalTo key, value
+    query.descending "createdAt"
+    query.limit limit
+
+    query.find()
+    .then (results) ->
+      deferred.resolve results or []
+    , (error) ->
+      deferred.resolve []
+
+    deferred.promise
+
+  ###
   className = 'className'
   id = 'lalala'
   data = {...}, e.g. {action: 'update'}
@@ -110,19 +137,6 @@ class DataStorage
     deferred.promise
 
   ###
-  Log an enter/exit event
-  Input: code = 'blah'
-  Output:
-    - it creates a new user and links the user with the input code
-    - returns a promise (a log object which has a parent attribute)
-  ###
-  log: (className, code) ->
-    @getUser 'Users', code
-    .then (user) =>
-      data = parent: {id: user.id}
-      @insert className, data
-
-  ###
   Creates a new user based on code or selects existing user if the code already registered
   Input: code = 'blah'
   Returns: a promise of a user object
@@ -141,5 +155,29 @@ class DataStorage
       .catch deferred.reject
 
     deferred.promise
+
+  ###
+  Log an enter/exit event
+  Input: code = 'blah'
+  Output:
+    - it creates a new user and links the user with the input code
+    - returns a promise (a log object which has a parent attribute)
+  ###
+  log: (className, code) ->
+    _parentId = null
+    @getUser 'Users', code
+    .then (user) =>
+      _parentId = user.id
+      @findLatest className, [{key:'parentId',value:_parentId}]
+    .then (logs) =>
+      # the action should be 'exit'
+      # if the entry before was ''enter'
+      # otherwise it should be 'enter'
+      log = logs[0] or null
+      action = if log?.get('action') is 'enter' then 'exit' else 'enter'
+      data =
+        action: action
+        parentId: _parentId
+      @insert className, data
 
 module.exports = DataStorage

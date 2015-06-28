@@ -15,7 +15,4 @@ rfid = new Rfid
 
 rfid.run()
 
-rfid.onDataReceive.then (code) ->
-    # create a user if not exists
-    # log the action of the user
-    #DataStorage.historyLog code
+rfid.onDataReceive.then dataStorage.log

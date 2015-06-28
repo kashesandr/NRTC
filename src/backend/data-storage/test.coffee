@@ -28,14 +28,15 @@ describe 'dataStorage instance', ->
   describe 'has a working method', ->
 
     afterEach (done) ->
+      @timeout 8000
       Q.all(
-        #controller.deleteAll('Test')
-        #controller.deleteAll('Users')
-        #controller.deleteAll('Logs')
+        controller.deleteAll('Test')
+        controller.deleteAll('Users')
+        controller.deleteAll('Logs')
       ).then done()
 
     it 'insert', (done) ->
-      @timeout 5000
+      @timeout 8000
 
       controller.insert.should.exists
 
@@ -54,7 +55,7 @@ describe 'dataStorage instance', ->
         controller.find.should.exists
 
       it 'if an entry exists', (done) ->
-        @timeout 5000
+        @timeout 8000
 
         controller.insert('Test', {action: 'find'})
         .then (result) ->
@@ -64,7 +65,7 @@ describe 'dataStorage instance', ->
           done()
 
       it 'if no entries', (done) ->
-        @timeout 5000
+        @timeout 8000
         controller.find('Test', [ {key:'action',value:'not-existing'} ])
         .then (results) ->
           expect(results).to.deep.equal []
@@ -76,7 +77,7 @@ describe 'dataStorage instance', ->
         controller.findById.should.exists
 
       it 'if an entry exists', (done) ->
-        @timeout 5000
+        @timeout 8000
         controller.insert 'Test', {action:'findById'}
         .then (result) ->
           controller.findById 'Test', result.id
@@ -85,10 +86,44 @@ describe 'dataStorage instance', ->
           done()
 
       it 'if no entries', (done) ->
-        @timeout 5000
+        @timeout 8000
         controller.findById 'Test', 'not-existing'
         .then (result) ->
           expect(result).to.equal null
+          done()
+
+    describe 'findLatest', ->
+
+      it 'exists', ->
+        controller.findLatest.should.exists
+
+      it 'if entries', (done) ->
+        @timeout 10000
+
+        controller.insert('Test', action:'findLatest-2')
+        .then (result) ->
+          controller.insert('Test', action:'findLatest-2')
+        .then (result) ->
+          controller.insert('Test', action:'findLatest-3')
+        .then (result) ->
+          controller.findLatest('Test')
+        .then (latest) ->
+          latest[0].get('action').should.equal 'findLatest-3'
+          controller.findLatest('Test', [{key:'action',value:'findLatest-2'}], 1)
+        .then (latest) ->
+          latest[0].get('action').should.equal 'findLatest-2'
+          controller.findLatest('Test', [], 2)
+        .then (latest) ->
+          latest.should.have.length 2
+          latest[0].get('action').should.equal 'findLatest-3'
+          latest[1].get('action').should.equal 'findLatest-2'
+          done()
+
+      it 'if no entries', (done) ->
+        @timeout 8000
+        controller.findLatest('Test3')
+        .then (results) ->
+          results.should.have.length 0
           done()
 
     describe 'delete', ->
@@ -97,7 +132,7 @@ describe 'dataStorage instance', ->
         controller.delete.should.exists
 
       it 'if an entry exists', (done) ->
-        @timeout 5000
+        @timeout 8000
 
         _id = null
 
@@ -110,7 +145,7 @@ describe 'dataStorage instance', ->
           done()
 
       it 'if nothing to delete', (done) ->
-        @timeout 5000
+        @timeout 8000
         controller.delete('Test', 'not-existing')
         .then (result) ->
           expect(result).to.equal null
@@ -122,7 +157,7 @@ describe 'dataStorage instance', ->
         controller.update.should.exists
 
       it 'if an entry exists', (done) ->
-        @timeout 5000
+        @timeout 8000
 
         controller.insert('Test', {action: 'pre-update'})
         .then (result) ->
@@ -134,49 +169,10 @@ describe 'dataStorage instance', ->
           done()
 
       it 'if no entries', (done) ->
-        @timeout 5000
+        @timeout 8000
         controller.update('Test', 'not-existing', {action: 'update'})
         .catch (result) ->
           expect(result).to.equal null
-          done()
-
-
-    ###
-      save logs when user enters/exits
-      Input: <String> code
-      Output: <String> action # enter / exit
-    ###
-    describe 'log', ->
-
-      it 'exists', ->
-        controller.log.should.exists
-
-      it 'when a user enters for the first time', (done) ->
-        @timeout 5000
-
-        controller.log('Logs', 'non-existing-code')
-        .then (result) ->
-          userId = result.get('parent').id
-          controller.findById "Users", userId
-        .then (result) ->
-          expect(result.get('code')).to.equal 'non-existing-code'
-          done()
-
-      xit 'when a user enters next time', (done) ->
-        @timeout 5000
-        controller.log('Logs', 'code')
-        .then (action) ->
-          action.should.equal 'enter'
-          done()
-
-      xit 'when a user exits', (done) ->
-        @timeout 5000
-        # dataStorage logs should already have
-        # the entry with action=`enter`
-
-        controller.log('Logs', 'code')
-        .then (action) ->
-          action.should.equal 'exit'
           done()
 
     # input data: <String> code
@@ -189,7 +185,7 @@ describe 'dataStorage instance', ->
         controller.getUser.should.exists
 
       it 'when a user does not exists', (done) ->
-        @timeout 5000
+        @timeout 8000
         code = 'a-new-code'
         controller.getUser('Users', code)
         .then (user) ->
@@ -198,7 +194,7 @@ describe 'dataStorage instance', ->
           done()
 
       it 'when a user exists already', (done) ->
-        @timeout 5000
+        @timeout 8000
 
         code = 'an-existing-code'
         _user = null
@@ -210,4 +206,44 @@ describe 'dataStorage instance', ->
         .then (user) ->
           expect(user.attributes).to.deep.equal _user.attributes
           expect(user.id).to.equal _user.id
+          done()
+
+    ###
+      save logs when user enters/exits
+      Input: <String> code
+      Output: <String> action # enter / exit
+    ###
+    describe 'log', ->
+
+      it 'exists', ->
+        controller.log.should.exists
+
+      it 'when a user enters for the first time', (done) ->
+        @timeout 10000
+
+        controller.log('Logs', 'not-existing-code')
+        .then (log) ->
+          log.get('action').should.equal 'enter'
+          controller.findById "Users", log.get('parentId')
+        .then (user) ->
+          expect(user.get('code')).to.equal 'not-existing-code'
+          done()
+
+      it 'when a user exits', (done) ->
+        @timeout 8000
+
+        _log = null
+
+        # when a user enters
+        controller.log('Logs', 'existing-code')
+        .then (log) ->
+          # and then the user exits
+          controller.log 'Logs', 'existing-code'
+        .then (log) ->
+          # the action should be 'exit'
+          log.get('action').should.equal 'exit'
+          controller.find('Logs', [{key:'parentId',value:log.get('parentId')}])
+        .then (results) ->
+          # and there should be 2 log entries in Logs
+          results.should.have.length 2
           done()
