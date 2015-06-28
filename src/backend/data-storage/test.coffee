@@ -1,249 +1,301 @@
 require 'coffee-script'
 chai = require 'chai'
 should = require "should"
-sinon = require 'sinon'
 Q = require 'q'
 Parse = require('parse').Parse
 DataStorage = require './controller'
-
 expect = chai.expect
 
 testConfigs =
-  "applicationId": "hZ9REGxSlyuHw8FQrhWuDtNndHJYYN3ZtncLEpup",
-  "javascriptKey": "9pnVzHopo1SC3sWAfG4Ajk4sdtZeBzQVNjM6CEsf"
-  "masterKey": "uwVtuFqpSnLxwus1Aa8TDBlZtMV6rgiy7gvYpvMy"
+  parse:
+    "applicationId": "hZ9REGxSlyuHw8FQrhWuDtNndHJYYN3ZtncLEpup",
+    "javascriptKey": "9pnVzHopo1SC3sWAfG4Ajk4sdtZeBzQVNjM6CEsf"
+    "masterKey": "uwVtuFqpSnLxwus1Aa8TDBlZtMV6rgiy7gvYpvMy"
+  className:
+    logs: 'Logs'
+    users: 'Users'
 
 Parse.initialize(
-  testConfigs.applicationId
-  testConfigs.javascriptKey
+  testConfigs.parse.applicationId
+  testConfigs.parse.javascriptKey
 )
 
-controller = new DataStorage testConfigs
+controller = null
 
-describe 'dataStorage instance', ->
+describe 'DataStorage', ->
 
-  it 'should exist', ->
-    controller.should.exists
+  it 'should have a error when not correctly initialized', ->
+    controller = new DataStorage {}
+    controller.error.should.equal true
 
-  describe 'has a working method', ->
+    controller = new DataStorage {parse:{}}
+    controller.error.should.equal true
 
-    afterEach (done) ->
-      @timeout 8000
-      Q.all(
-        controller.deleteAll('Test')
-        controller.deleteAll('Users')
-        controller.deleteAll('Logs')
-      ).then done()
+    controller = new DataStorage {parse:applicationId:'foo'}
+    controller.error.should.equal true
 
-    it 'insert', (done) ->
-      @timeout 8000
+    controller = new DataStorage {parse:javascriptKey:'foo'}
+    controller.error.should.equal true
 
-      controller.insert.should.exists
+    controller = new DataStorage
+      parse:
+        applicationId:'foo'
+        javascriptKey:'bar'
+    controller.error.should.equal true
 
-      controller.insert('Test', {action: 'insert'})
-      .then (result) ->
-        Inserted = Parse.Object.extend 'Test'
-        query = new Parse.Query Inserted
-        query.get result.id,
-          success: (result) ->
-            result.get('action').should.equal 'insert'
-            done()
+    controller = new DataStorage
+      className:
+        logs: 'Logs'
+    controller.error.should.equal true
 
-    describe 'find', ->
+    controller = new DataStorage
+      className:
+        users: 'Users'
+    controller.error.should.equal true
 
-      it 'exists', ->
-        controller.find.should.exists
+    controller = new DataStorage
+      className:
+        logs: 'Logs'
+        users: 'Users'
+    controller.error.should.equal true
 
-      it 'if an entry exists', (done) ->
-        @timeout 8000
+  describe 'should', ->
 
-        controller.insert('Test', {action: 'find'})
-        .then (result) ->
-          controller.find 'Test', [ {key:'action',value:'find'} ]
-        .then (results) ->
-          results[0].get('action').should.equal 'find'
-          done()
+    beforeEach ->
+      controller = new DataStorage testConfigs
 
-      it 'if no entries', (done) ->
-        @timeout 8000
-        controller.find('Test', [ {key:'action',value:'not-existing'} ])
-        .then (results) ->
-          expect(results).to.deep.equal []
-          done()
+    it 'exist', ->
+      controller.should.exists
 
-    describe 'findById', ->
+    it 'be initialized correctly', ->
+      controller.error.should.equal false
+      controller.className.logs.should.equal 'Logs'
+      controller.className.users.should.equal 'Users'
 
-      it 'exists', ->
-        controller.findById.should.exists
+    describe 'have', ->
 
-      it 'if an entry exists', (done) ->
-        @timeout 8000
-        controller.insert 'Test', {action:'findById'}
-        .then (result) ->
-          controller.findById 'Test', result.id
-        .then (result) ->
-          result.get('action').should.equal 'findById'
-          done()
-
-      it 'if no entries', (done) ->
-        @timeout 8000
-        controller.findById 'Test', 'not-existing'
-        .then (result) ->
-          expect(result).to.equal null
-          done()
-
-    describe 'findLatest', ->
-
-      it 'exists', ->
-        controller.findLatest.should.exists
-
-      it 'if entries', (done) ->
+      afterEach (done) ->
         @timeout 10000
+        Q.all(
+          controller.deleteAll('Test')
+          controller.deleteAll('Logs')
+          controller.deleteAll('Users')
+        ).then done()
 
-        controller.insert('Test', action:'findLatest-2')
-        .then (result) ->
-          controller.insert('Test', action:'findLatest-2')
-        .then (result) ->
-          controller.insert('Test', action:'findLatest-3')
-        .then (result) ->
-          controller.findLatest('Test')
-        .then (latest) ->
-          latest[0].get('action').should.equal 'findLatest-3'
-          controller.findLatest('Test', [{key:'action',value:'findLatest-2'}], 1)
-        .then (latest) ->
-          latest[0].get('action').should.equal 'findLatest-2'
-          controller.findLatest('Test', [], 2)
-        .then (latest) ->
-          latest.should.have.length 2
-          latest[0].get('action').should.equal 'findLatest-3'
-          latest[1].get('action').should.equal 'findLatest-2'
-          done()
+      describe 'a generic method', ->
 
-      it 'if no entries', (done) ->
-        @timeout 8000
-        controller.findLatest('Test3')
-        .then (results) ->
-          results.should.have.length 0
-          done()
+        describe '`insert` which', ->
 
-    describe 'delete', ->
+          it 'exists', ->
+            controller.insert.should.exists
 
-      it 'exists', ->
-        controller.delete.should.exists
+          it 'works correctly', (done) ->
+            @timeout 10000
+            controller.insert('Test', {action: 'insert'})
+            .then (result) ->
+              Inserted = Parse.Object.extend 'Test'
+              query = new Parse.Query Inserted
+              query.get result.id,
+                success: (result) ->
+                  result.get('action').should.equal 'insert'
+                  done()
 
-      it 'if an entry exists', (done) ->
-        @timeout 8000
+        describe '`find` which', ->
 
-        _id = null
+          it 'exists', ->
+            controller.find.should.exists
 
-        controller.insert('Test', {action: 'delete'})
-        .then (result) ->
-          _id = result.id
-          controller.delete 'Test', _id
-        .then (result) ->
-          expect(result.id).to.equal _id
-          done()
+          it 'works correctly', (done) ->
+            @timeout 10000
 
-      it 'if nothing to delete', (done) ->
-        @timeout 8000
-        controller.delete('Test', 'not-existing')
-        .then (result) ->
-          expect(result).to.equal null
-          done()
+            controller.insert('Test', {action:'find'})
+            .then (result) ->
+              controller.find 'Test', [ {key:'action',value:'find'} ]
+            .then (results) ->
+              results[0].get('action').should.equal 'find'
+              done()
 
-    describe 'update', ->
+          it 'works fine when no search results', (done) ->
+            @timeout 10000
 
-      it 'exists', ->
-        controller.update.should.exists
+            controller.find('Test', [ {key:'action',value:'not-existing'} ])
+            .then (results) ->
+              expect(results).to.deep.equal []
+              done()
 
-      it 'if an entry exists', (done) ->
-        @timeout 8000
+        describe '`findById` which', ->
 
-        controller.insert('Test', {action: 'pre-update'})
-        .then (result) ->
-          controller.update 'Test', result.id, {action: 'update'}
-        .then (result) ->
-          controller.findById 'Test', result.id
-        .then (result) ->
-          result.get('action').should.equal 'update'
-          done()
+          it 'exists', ->
+            controller.findById.should.exists
 
-      it 'if no entries', (done) ->
-        @timeout 8000
-        controller.update('Test', 'not-existing', {action: 'update'})
-        .catch (result) ->
-          expect(result).to.equal null
-          done()
+          it 'works fine', (done) ->
+            @timeout 10000
 
-    # input data: <String> code
-    # output:
-    # 1) returns a created user
-    # 2) returns an already existing user with the provided code
-    describe 'getUser', ->
+            controller.insert 'Test', {action:'findById'}
+            .then (result) ->
+              controller.findById 'Test', result.id
+            .then (result) ->
+              result.get('action').should.equal 'findById'
+              done()
 
-      it 'should exist', ->
-        controller.getUser.should.exists
+          it 'works fine when no search results', (done) ->
+            @timeout 10000
 
-      it 'when a user does not exists', (done) ->
-        @timeout 8000
-        code = 'a-new-code'
-        controller.getUser('Users', code)
-        .then (user) ->
-          user.get('code').should.equal code
-          expect(user.get 'logs').to.deep.equal []
-          done()
+            controller.findById 'Test', 'not-existing'
+            .then (result) ->
+              expect(result).to.equal null
+              done()
 
-      it 'when a user exists already', (done) ->
-        @timeout 8000
+        describe '`findLatest` which', ->
 
-        code = 'an-existing-code'
-        _user = null
+          it 'exists', ->
+            controller.findLatest.should.exists
 
-        controller.getUser('Users', code)
-        .then (user) ->
-          _user = user
-          controller.getUser('Users', code)
-        .then (user) ->
-          expect(user.attributes).to.deep.equal _user.attributes
-          expect(user.id).to.equal _user.id
-          done()
+          it 'works fine', (done) ->
+            @timeout 10000
 
-    ###
-      save logs when user enters/exits
-      Input: <String> code
-      Output: <String> action # enter / exit
-    ###
-    describe 'log', ->
+            Q.all(
+              controller.insert('Test', action:'findLatest-2'),
+              controller.insert('Test', action:'findLatest-2'),
+              controller.insert('Test', action:'findLatest-3')
+            ).then (result) ->
+              controller.findLatest('Test') # the latest
+            .then (latest) ->
+              latest[0].get('action').should.equal 'findLatest-3'
+              controller.findLatest('Test', [{key:'action',value:'findLatest-2'}], 1)
+            .then (latest) ->
+              latest[0].get('action').should.equal 'findLatest-2'
+              controller.findLatest('Test', [], 2)
+            .then (latest) ->
+              latest.should.have.length 2
+              latest[0].get('action').should.equal 'findLatest-3'
+              latest[1].get('action').should.equal 'findLatest-2'
+              done()
 
-      it 'exists', ->
-        controller.log.should.exists
+          it 'works fine when no search results', (done) ->
+            @timeout 10000
 
-      it 'when a user enters for the first time', (done) ->
-        @timeout 10000
+            controller.findLatest('Test3')
+            .then (results) ->
+              results.should.have.length 0
+              done()
 
-        controller.log('Logs', 'not-existing-code')
-        .then (log) ->
-          log.get('action').should.equal 'enter'
-          controller.findById "Users", log.get('parentId')
-        .then (user) ->
-          expect(user.get('code')).to.equal 'not-existing-code'
-          done()
+        describe '`delete` which', ->
 
-      it 'when a user exits', (done) ->
-        @timeout 8000
+          it 'exists', ->
+            controller.delete.should.exists
 
-        _log = null
+          it 'works fine', (done) ->
+            @timeout 10000
 
-        # when a user enters
-        controller.log('Logs', 'existing-code')
-        .then (log) ->
-          # and then the user exits
-          controller.log 'Logs', 'existing-code'
-        .then (log) ->
-          # the action should be 'exit'
-          log.get('action').should.equal 'exit'
-          controller.find('Logs', [{key:'parentId',value:log.get('parentId')}])
-        .then (results) ->
-          # and there should be 2 log entries in Logs
-          results.should.have.length 2
-          done()
+            expectId = null
+
+            controller.insert('Test', {action: 'delete'})
+            .then (result) ->
+              expectId = result.id
+              controller.delete 'Test', expectId
+            .then (result) ->
+              expect(result.id).to.equal expectId
+              done()
+
+          it 'works fine when nothing to delete', (done) ->
+            @timeout 10000
+
+            controller.delete('Test', 'not-existing')
+            .then (result) ->
+              expect(result).to.equal null
+              done()
+
+        describe '`update` which', ->
+
+          it 'exists', ->
+            controller.update.should.exists
+
+          it 'works fine', (done) ->
+            @timeout 10000
+
+            controller.insert('Test', {action: 'pre-update'})
+            .then (result) ->
+              controller.update 'Test', result.id, {action: 'update'}
+            .then (result) ->
+              controller.findById 'Test', result.id
+            .then (result) ->
+              result.get('action').should.equal 'update'
+              done()
+
+          it 'works fine when nothing to update', (done) ->
+            @timeout 10000
+
+            controller.update('Test', 'not-existing', {action: 'update'})
+            .catch (result) ->
+              expect(result).to.equal null
+              done()
+
+      describe 'a method', ->
+
+        describe '`getUser` which', ->
+
+          it 'exist', ->
+            controller.getUser.should.exists
+
+          it 'works fine', (done) ->
+            @timeout 10000
+
+            code = 'a-new-code'
+            controller.getUser('Users', code)
+            .then (user) ->
+              user.get('code').should.equal code
+              expect(user.get 'logs').to.deep.equal []
+              done()
+
+          it 'works fine when a user with such code exists already', (done) ->
+            @timeout 10000
+
+            existingCode = 'an-existing-code'
+            expectedUser = null
+
+            controller.getUser('Users', existingCode)
+            .then (user) ->
+              expectedUser = user
+              controller.getUser('Users', existingCode)
+            .then (user) ->
+              expect(user.attributes).to.deep.equal(
+                expectedUser.attributes
+              )
+
+              expect(user.id).to.equal expectedUser.id
+              done()
+
+        describe '`log` which', ->
+
+          it 'exists', ->
+            controller.log.should.exists
+
+          it 'works fine when a user enters for the first time', (done) ->
+            @timeout 10000
+
+            controller.log('Logs', 'not-existing-code')
+            .then (log) ->
+              log.get('action').should.equal 'enter'
+              controller.findById "Users", log.get('parentId')
+            .then (user) ->
+              expect(user.get('code')).to.equal 'not-existing-code'
+              done()
+
+          it 'works fine when a user exits', (done) ->
+            @timeout 10000
+
+            # when a user enters
+            controller.log('Logs', 'existing-code')
+            .then (log) ->
+              # and then the user exits
+              controller.log 'Logs', 'existing-code'
+            .then (log) ->
+              # the last action should be 'exit'
+              parentId = log.get('parentId')
+              log.get('action').should.equal 'exit'
+              controller.find('Logs', [{key:'parentId',value:parentId}])
+            .then (results) ->
+              # and there should be 2 log entries in Logs for the user
+              results.should.have.length 2
+              done()

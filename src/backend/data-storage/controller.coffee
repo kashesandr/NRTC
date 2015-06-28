@@ -7,10 +7,30 @@ Q = require 'q'
 class DataStorage
 
   constructor: (configs) ->
+
+    @error = false
+
+    parseConfigs = configs?.parse
+
+    error = true if \
+      not configs? or not parseConfigs? or \
+      not parseConfigs.applicationId or \
+      not parseConfigs.javascriptKey or \
+      not configs.className?.logs or \
+      not configs.className?.users
+
+    if error
+      @error = true
+      return logger.error(
+        'Error when initializing data controller'
+      )
+
     Parse.initialize(
-      configs.applicationId,
-      configs.javascriptKey
+      parseConfigs.applicationId,
+      parseConfigs.javascriptKey
     )
+
+    @className = configs.className
 
   ###
   className = 'className'
@@ -18,6 +38,8 @@ class DataStorage
   returns a promise
   ###
   insert: (className, data) ->
+    return null if @error
+
     deferred = Q.defer()
 
     Object = Parse.Object.extend className
@@ -37,6 +59,8 @@ class DataStorage
   returns promise
   ###
   find: (className, equalToArray) ->
+    return null if @error
+
     deferred = Q.defer()
 
     Object = Parse.Object.extend className
@@ -55,6 +79,8 @@ class DataStorage
     deferred.promise
 
   findById: (className, id) ->
+    return null if @error
+
     deferred = Q.defer()
 
     Object = Parse.Object.extend className
@@ -75,6 +101,8 @@ class DataStorage
   returns a promise (array of latest entries)
   ###
   findLatest: (className, equalToArray = [], limit = 1) ->
+    return null if @error
+
     deferred = Q.defer()
 
     Object = Parse.Object.extend className
@@ -100,6 +128,8 @@ class DataStorage
   data = {...}, e.g. {action: 'update'}
   ###
   update: (className, id, data) ->
+    return null if @error
+
     data.id = id
     @insert className, data
 
@@ -109,6 +139,8 @@ class DataStorage
   returns promise
   ###
   delete: (className, id) ->
+    return null if @error
+
     deferred = Q.defer()
 
     @findById(className, id)
@@ -125,6 +157,7 @@ class DataStorage
     deferred.promise
 
   deleteAll: (className) ->
+    return null if @error
     deferred = Q.defer()
 
     query = new Parse.Query(className)
@@ -142,6 +175,8 @@ class DataStorage
   Returns: a promise of a user object
   ###
   getUser: (className, code) ->
+    return null if @error
+
     deferred = Q.defer()
 
     @find className, [{key:'code', value:code}]
@@ -164,6 +199,8 @@ class DataStorage
     - returns a promise (a log object which has a parent attribute)
   ###
   log: (className, code) ->
+    return null if @error
+
     _parentId = null
     @getUser 'Users', code
     .then (user) =>
