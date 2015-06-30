@@ -61,8 +61,8 @@ describe 'Rfid', ->
             done()
         )
 
-      it 'onDataReceive', (done) ->
-        rfid.onDataReceive.should.exists
-        rfid.onDataReceive('123').then (d) ->
+      it "'data-received' event", (done) ->
+        rfid.on 'data-received', (d) ->
           d.should.equal '123'
           done()
+        rfid._onDataReceive '123'

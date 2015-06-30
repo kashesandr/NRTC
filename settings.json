@@ -6,10 +6,9 @@
       "masterKey": ""
     },
     "database": {
-      "table": {
-        "history": "History",
-        "tags": "Tags",
-        "logs": "Logs"
+      "className": {
+        "logs": "Logs",
+        "users": "Users"
       }
     }
   }

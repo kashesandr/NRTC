@@ -242,10 +242,9 @@ describe 'DataStorage', ->
             @timeout 10000
 
             code = 'a-new-code'
-            controller.getUser('Users', code)
+            controller.getUser(code)
             .then (user) ->
               user.get('code').should.equal code
-              expect(user.get 'logs').to.deep.equal []
               done()
 
           it 'works fine when a user with such code exists already', (done) ->
@@ -254,10 +253,10 @@ describe 'DataStorage', ->
             existingCode = 'an-existing-code'
             expectedUser = null
 
-            controller.getUser('Users', existingCode)
+            controller.getUser(existingCode)
             .then (user) ->
               expectedUser = user
-              controller.getUser('Users', existingCode)
+              controller.getUser(existingCode)
             .then (user) ->
               expect(user.attributes).to.deep.equal(
                 expectedUser.attributes
@@ -271,31 +270,37 @@ describe 'DataStorage', ->
           it 'exists', ->
             controller.log.should.exists
 
-          it 'works fine when a user enters for the first time', (done) ->
+          it 'works fine when a user enters', (done) ->
             @timeout 10000
 
-            controller.log('Logs', 'not-existing-code')
+            controller.log('not-existing-code')
             .then (log) ->
               log.get('action').should.equal 'enter'
               controller.findById "Users", log.get('parentId')
             .then (user) ->
-              expect(user.get('code')).to.equal 'not-existing-code'
+              user.get('code').should.equal 'not-existing-code'
+              user.get('isOnline').should.equal true
               done()
 
           it 'works fine when a user exits', (done) ->
             @timeout 10000
 
+            _parentId = null
+
             # when a user enters
-            controller.log('Logs', 'existing-code')
+            controller.log('existing-code')
             .then (log) ->
               # and then the user exits
-              controller.log 'Logs', 'existing-code'
+              controller.log 'existing-code'
             .then (log) ->
               # the last action should be 'exit'
-              parentId = log.get('parentId')
+              _parentId = log.get('parentId')
               log.get('action').should.equal 'exit'
-              controller.find('Logs', [{key:'parentId',value:parentId}])
+              controller.find('Logs', [{key:'parentId',value:_parentId}])
             .then (results) ->
               # and there should be 2 log entries in Logs for the user
               results.should.have.length 2
+              controller.findById('Users', _parentId)
+            .then (user) ->
+              user.get('isOnline').should.equal false
               done()

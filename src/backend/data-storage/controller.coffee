@@ -12,15 +12,14 @@ class DataStorage
 
     parseConfigs = configs?.parse
 
-    error = true if \
+    @error = true if \
       not configs? or not parseConfigs? or \
       not parseConfigs.applicationId or \
       not parseConfigs.javascriptKey or \
       not configs.className?.logs or \
       not configs.className?.users
 
-    if error
-      @error = true
+    if @error
       return logger.error(
         'Error when initializing data controller'
       )
@@ -174,18 +173,17 @@ class DataStorage
   Input: code = 'blah'
   Returns: a promise of a user object
   ###
-  getUser: (className, code) ->
+  getUser: (code) ->
     return null if @error
 
     deferred = Q.defer()
 
-    @find className, [{key:'code', value:code}]
+    @find @className.users, [{key:'code', value:code}]
     .then (results) =>
       deferred.resolve results[0] if results?.length > 0
       data =
         code: code
-        logs: []
-      @insert className, data
+      @insert @className.users, data
       .then deferred.resolve
       .catch deferred.reject
 
@@ -198,23 +196,26 @@ class DataStorage
     - it creates a new user and links the user with the input code
     - returns a promise (a log object which has a parent attribute)
   ###
-  log: (className, code) ->
+  log: (code) ->
     return null if @error
 
     _parentId = null
-    @getUser 'Users', code
+
+    @getUser code
     .then (user) =>
       _parentId = user.id
-      @findLatest className, [{key:'parentId',value:_parentId}]
+      @findLatest @className.logs, [{key:'parentId',value:_parentId}]
     .then (logs) =>
       # the action should be 'exit'
       # if the entry before was ''enter'
       # otherwise it should be 'enter'
       log = logs[0] or null
       action = if log?.get('action') is 'enter' then 'exit' else 'enter'
-      data =
-        action: action
-        parentId: _parentId
-      @insert className, data
+      userIsOnline = if action is 'enter' then true else false
+      Q.all(
+        @insert @className.logs, {action: action, parentId: _parentId}
+        @update @className.users, _parentId, {isOnline: userIsOnline}
+      )
+
 
 module.exports = DataStorage

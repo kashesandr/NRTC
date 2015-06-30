@@ -1,12 +1,26 @@
 logger = require './../tools/logger'
 serialPort = require 'serialport'
 Q = require 'q'
+events = require 'events'
+
+eventEmitter = new events.EventEmitter()
 
 SerialPort = serialPort.SerialPort
 
 class Rfid
 
     constructor: (@configs) ->
+
+        @error = false
+
+        @error = true if \
+            not @configs?.pnpIdRegexp or \
+            not @configs.chunksTimeout
+
+        if @error
+            return logger.error(
+                "Error when initializing Rfid controller"
+            )
 
         @_pnpIdRegexp = @configs.pnpIdRegexp
         @_chunksTimeout = @configs.chunksTimeout
@@ -32,12 +46,14 @@ class Rfid
 
             @addEvents()
 
+            return @
+
     addEvents: ->
 
         @_rfidReader.on 'open', =>
             logger.info "Serial port #{@comName} opened"
 
-        @_rfidReader.on 'data', @onDataReceive
+        @_rfidReader.on 'data', @_onDataReceive
 
         @_rfidReader.on 'error', (error) ->
             logger.error "Error on port #{@comName} occurred: #{error}"
@@ -45,19 +61,28 @@ class Rfid
         @_rfidReader.on 'close', =>
             logger.info "Serial port #{@comName} closed."
 
-    onDataReceive: (d = '') =>
-        deferred = Q.defer()
+        eventEmitter.on 'data-received', (code) =>
+            @when('data-received') = do ->
+                deferred = Q.defer()
+                deferred.resolve code
+                deferred.promise
 
-        @_code += d.toString 'hex'
+    when: (event) ->
+        switch event
+            when 'data-received' then return
+            else return null
+
+    _onDataReceive: (d = '') =>
+
+        @_code += d.toString 'hex' if d?
         clearTimeout @_timer if @_timer
 
         @_timer = setTimeout =>
             logger.info "Data Received from the reader: '#{@_code}'"
-            deferred.resolve @_code
+            eventEmitter.emit 'data-received', @_code
             @_code = ''
         , @_chunksTimeout
 
-        deferred.promise
 
     _findComName: (serial, pnpIdRegexp) ->
         deferred = Q.defer()
