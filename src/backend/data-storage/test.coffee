@@ -61,8 +61,10 @@ describe 'DataStorage', ->
 
   describe 'should', ->
 
-    beforeEach ->
+    beforeEach (done) ->
+      @timeout 10000
       controller = new DataStorage testConfigs
+      setTimeout done, 500
 
     it 'exist', ->
       controller.should.exists
@@ -80,7 +82,7 @@ describe 'DataStorage', ->
           controller.deleteAll('Test')
           controller.deleteAll('Logs')
           controller.deleteAll('Users')
-        ).then done()
+        ).then(setTimeout done, 1000)
 
       describe 'a generic method', ->
 
@@ -105,7 +107,7 @@ describe 'DataStorage', ->
           it 'exists', ->
             controller.find.should.exists
 
-          it 'works correctly', (done) ->
+          it 'works fine', (done) ->
             @timeout 10000
 
             controller.insert('Test', {action:'find'})
@@ -161,6 +163,7 @@ describe 'DataStorage', ->
             ).then (result) ->
               controller.findLatest('Test') # the latest
             .then (latest) ->
+              latest.should.have.length 3
               latest[0].get('action').should.equal 'findLatest-3'
               controller.findLatest('Test', [{key:'action',value:'findLatest-2'}], 1)
             .then (latest) ->
