@@ -43,26 +43,24 @@ describe 'Rfid', ->
       it 'findComName', (done) ->
         rfid._findComName.should.exists
         serialport = new SerialportMock()
-        async.parallel(
-          [
-            (callback) ->
-              rfid._findComName(serialport, new RegExp("PL2303", 'g'))
-              .then (comName) -> callback null, comName
-            (callback) ->
-              rfid._findComName(serialport, new RegExp("PL2304", 'g'))
-              .then (comName) -> callback null, comName
-            (callback) ->
-              rfid._findComName(serialport, new RegExp("pnp", 'g'))
-              .catch (error) -> callback null, error
-          ], (error, results) ->
-            results[0].should.equal 'COM1'
-            results[1].should.equal 'COM2'
-            expect(results[2]).to.deep.equal "No serialports found with pnp like: /pnp/g"
-            done()
-        )
+        async.parallel [
+          (callback) ->
+            rfid._findComName(serialport, new RegExp("PL2303", 'g'))
+            .then (comName) -> callback null, comName
+          (callback) ->
+            rfid._findComName(serialport, new RegExp("PL2304", 'g'))
+            .then (comName) -> callback null, comName
+          (callback) ->
+            rfid._findComName(serialport, new RegExp("pnp", 'g'))
+            .catch (error) -> callback null, error
+        ], (error, results) ->
+          results[0].should.equal 'COM1'
+          results[1].should.equal 'COM2'
+          expect(results[2]).to.deep.equal "Reader: No serialports found with pnp like: /pnp/g"
+          done()
 
       it "'data-received' event", (done) ->
         rfid.on 'data-received', (d) ->
           d.should.equal '123'
           done()
-        rfid._onDataReceive '123'
+        setTimeout (-> rfid._onDataReceive('123')), 250

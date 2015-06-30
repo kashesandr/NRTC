@@ -3,9 +3,8 @@ serialPort = require 'serialport'
 Q = require 'q'
 events = require 'events'
 
-eventEmitter = new events.EventEmitter()
-
 SerialPort = serialPort.SerialPort
+dispatch = new events.EventEmitter()
 
 class Rfid
 
@@ -18,9 +17,7 @@ class Rfid
             not @configs.chunksTimeout
 
         if @error
-            return logger.error(
-                "Error when initializing Rfid controller"
-            )
+            return logger.error "Reader: Error when initializing"
 
         @_pnpIdRegexp = @configs.pnpIdRegexp
         @_chunksTimeout = @configs.chunksTimeout
@@ -42,7 +39,7 @@ class Rfid
             @_rfidReader = new SerialPort @comName, @serialPortOptions
 
             if not @_rfidReader
-                return logger.error "Cannot create serialPort"
+                return logger.error "Reader: Cannot create serialPort"
 
             @addEvents()
 
@@ -51,25 +48,21 @@ class Rfid
     addEvents: ->
 
         @_rfidReader.on 'open', =>
-            logger.info "Serial port #{@comName} opened"
+            logger.info "Reader: Serial port #{@comName} opened"
 
         @_rfidReader.on 'data', @_onDataReceive
 
         @_rfidReader.on 'error', (error) ->
-            logger.error "Error on port #{@comName} occurred: #{error}"
+            logger.error "Reader: Error on port #{@comName} occurred: #{error}"
 
         @_rfidReader.on 'close', =>
-            logger.info "Serial port #{@comName} closed."
+            logger.info "Reader: Serial port #{@comName} closed."
 
-        eventEmitter.on 'data-received', (code) =>
-            @when('data-received') = do ->
-                deferred = Q.defer()
-                deferred.resolve code
-                deferred.promise
+    on: (eventName, callback) ->
 
-    when: (event) ->
-        switch event
-            when 'data-received' then return
+        switch eventName
+            when 'data-received' then do ->
+                dispatch.on 'data-received', callback
             else return null
 
     _onDataReceive: (d = '') =>
@@ -78,8 +71,8 @@ class Rfid
         clearTimeout @_timer if @_timer
 
         @_timer = setTimeout =>
-            logger.info "Data Received from the reader: '#{@_code}'"
-            eventEmitter.emit 'data-received', @_code
+            logger.info "Reader: Data Received: '#{@_code}'"
+            dispatch.emit 'data-received', @_code
             @_code = ''
         , @_chunksTimeout
 
@@ -90,7 +83,7 @@ class Rfid
         serial.list (error, ports) ->
 
             if error
-                msg = "Error occured when listing serialports: #{error}"
+                msg = "Reader: Error occured when listing serialports: #{error}"
                 logger.error msg
                 deferred.reject msg
 
@@ -99,7 +92,7 @@ class Rfid
                 if port?.pnpId.match pnpIdRegexp
                     return deferred.resolve port.comName
 
-            msg = "No serialports found with pnp like: #{pnpIdRegexp}"
+            msg = "Reader: No serialports found with pnp like: #{pnpIdRegexp}"
             logger.error msg
             deferred.reject msg
 
