@@ -14,4 +14,4 @@ rfid = new Rfid
     chunksTimeout: CONFIGS.CHUNKS_TIMEOUT
 
 rfid.run()
-.on 'data-received' dataStorage.log
+.on 'data-received', dataStorage.log
