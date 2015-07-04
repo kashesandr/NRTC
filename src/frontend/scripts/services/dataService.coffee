@@ -4,35 +4,49 @@ nrtc.factory "dataService", ($rootScope, GLOBAL_CONFIGS) ->
 
     DB_CONFIGS = GLOBAL_CONFIGS.DATABASE
 
-    historyLoad = (count) ->
-        query = new Parse.Query DB_CONFIGS.className.logs
-        query.descending("updatedAt")
-        .limit(count || 10)
-        .find
-            success: (data) ->
-                $rootScope.$broadcast 'historyLoaded', data.map (item)->
-                    id: item.id
-                    code: item.get 'code'
-                    updatedAt: item.updatedAt
-                    timeEnter: item.get 'timeEnter'
-                    timeExit: item.get 'timeExit'
-            error: (error) ->
-                $rootScope.$broadcast 'error', error
+    exports =
 
-    cardDelete = (id) ->
+        logsLoad : (count = 10) ->
+            query = new Parse.Query DB_CONFIGS.className.logs
+            query.descending("createdAt")
+            .limit(count)
+            .find
+                success: (data) ->
+                    $rootScope.$broadcast 'logsLoaded', data.map (item)->
+                        id: item.id
+                        code: item.get 'code'
+                        parentId: item.get 'parentId'
+                        action: item.get 'action'
+                        createdAt: item.createdAt
+                error: (error) ->
+                    $rootScope.$broadcast 'error', error
 
-        query = new Parse.Query DB_CONFIGS.className.logs
+        logDelete : (id) ->
+            query = new Parse.Query DB_CONFIGS.className.logs
+            query.get id,
+                success: (data) ->
+                    $rootScope.$emit 'logDeleted', id
+                    data.destroy({})
+                error: (error) ->
+                    $rootScope.$broadcast 'error', error
 
-        query.get id,
-            success: (data) ->
-                data.destroy({})
-            error: (error) ->
-                $rootScope.$broadcast 'error', error
+        usersLoad : (count = 10) ->
+            query = new Parse.Query DB_CONFIGS.className.users
+            query
+            .equalTo('isOnline', true)
+            .limit(count)
+            .find
+                success: (data) ->
+                    $rootScope.$broadcast 'usersLoaded', data.map (item)->
+                        id: item.id
+                        code: item.get 'code'
+                        isOnline: item.get 'isOnline'
+                error: (error) ->
+                    $rootScope.$broadcast 'error', error
 
-    $rootScope.$on 'cardDelete', (e, id) ->
-        cardDelete id
+    # add events
+    for funcName, func of exports
+        $rootScope.$on funcName, (e, param) ->
+            func param
 
-    exports = {
-        historyLoad
-        cardDelete
-    }
+    exports

@@ -4,16 +4,18 @@ nrtc.controller "nrtcController", ($scope, PRICE) ->
 
     $scope.data = {}
 
-    $scope.$on "historyLoaded", (e, data) ->
-        data.forEach (card) ->
-            durationInMinutes = moment(card.timeExit || new Date()).diff(moment(card.timeEnter), 'minutes')
-            price = if (durationInMinutes < PRICE.discountPeriodInMinutes)\
-                then durationInMinutes*PRICE.priceBefore\
-                else PRICE.discountPeriodInMinutes*(PRICE.priceBefore-PRICE.priceAfter)+durationInMinutes*PRICE.priceAfter
-            card.durationInMinutes = durationInMinutes || 0
-            card.price = price || 0
-            card.isOnline = card.timeExit is null
-        $scope.data = data
+    $scope.$on "usersLoaded", (e, data) ->
 
-    $scope.cardDelete = (id) ->
-        $scope.$emit 'cardDelete', id
+        $scope.entries = data.map (user) ->
+
+            exports = {
+                code: user.code
+                isOnline: user.isOnline
+                timeEnter: null
+                timeExit: null
+                durationInMinutes: null
+                price: null
+            }
+
+    $scope.logDelete = (id) ->
+        $scope.$emit 'logDelete', id

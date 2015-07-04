@@ -19,19 +19,20 @@
                     th Price
                     th(ng-if="editMode") Action
                 tbody
-                    tr(ng-repeat="card in data | orderBy:['isOnline','updatedAt']:true")
+                    //tr(ng-repeat="entry in entries | orderBy:['isOnline','updatedAt']:true")
+                    tr(ng-repeat="entry in entries | orderBy:['isOnline','timeEnter','timeExit']:true")
                         td {{$index+1}}
-                        td {{card.code}}
+                        td {{entry.code}}
                         td
-                            .label(ng-class="{'true':'label-success','false':'label-default'}[card.isOnline]")
-                                | {{ {'true':'Online', 'false':'Offline'}[card.isOnline] }}
-                        td {{card.timeEnter | amDateFormat:'HH:mm:ss (MMMM D YYYY)'}}
-                        td {{card.timeExit | amDateFormat:'HH:mm:ss (MMMM D YYYY)'}}
+                            .label(ng-class="{'true':'label-success','false':'label-default'}[entry.isOnline]")
+                                | {{ {'true':'Online', 'false':'Offline'}[entry.isOnline] }}
+                        td {{entry.timeEnter | amDateFormat:'HH:mm:ss (MMMM D YYYY)'}}
+                        td {{entry.timeExit | amDateFormat:'HH:mm:ss (MMMM D YYYY)'}}
                         td
-                            .label(ng-class="{'true':'label-success','false':'label-default'}[card.isOnline]")
-                                | {{card.durationInMinutes}}
+                            .label(ng-class="{'true':'label-success','false':'label-default'}[entry.isOnline]")
+                                | {{entry.durationInMinutes}}
                         td
-                            .label(ng-class="{'true':'label-success','false':'label-info'}[card.isOnline]")
-                                | {{card.price}}
+                            .label(ng-class="{'true':'label-success','false':'label-info'}[entry.isOnline]")
+                                | {{entry.price}}
                         td(ng-if="editMode")
-                            button.btn.btn-danger(ng-click="cardDelete(card.id)") Delete
+                            button.btn.btn-danger(ng-click="logDelete(entry.id)") Delete

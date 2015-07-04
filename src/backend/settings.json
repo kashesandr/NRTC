@@ -2,7 +2,7 @@
     "SERIALPORT": {
         "PNP_ID_REGEXP": "PID_2303"
     },
-    "CHUNKS_TIMEOUT": 500,
+    "CHUNKS_TIMEOUT": 280,
     "PARSE": {},
     "DATABASE": {}
 }
