@@ -23,6 +23,7 @@ class DataStorage
       return logger.error(
         'Error when initializing data controller'
       )
+    logger.info 'Data controller initialized correctly'
 
     Parse.initialize(
       parseConfigs.applicationId,
@@ -46,6 +47,7 @@ class DataStorage
 
     insert.save(data)
     .then (result) ->
+      logger.debug "Data inserted to #{className}: #{JSON.stringify data}"
       deferred.resolve result
     , (error) ->
       deferred.reject null
@@ -71,6 +73,7 @@ class DataStorage
 
     query.find()
     .then (results) ->
+      logger.debug "Data found in #{className}: #{JSON.stringify results}"
       deferred.resolve results or []
     , (error) ->
       deferred.resolve []
@@ -86,6 +89,7 @@ class DataStorage
     query = new Parse.Query Object
     query.get(id)
     .then (result) ->
+      logger.debug "Data found in #{className}: #{JSON.stringify result}"
       deferred.resolve result
     , (result, error) ->
       deferred.resolve null
@@ -115,6 +119,7 @@ class DataStorage
 
     query.find()
     .then (results) ->
+      logger.debug "Data found in #{className}: #{JSON.stringify results}"
       deferred.resolve results or []
     , (error) ->
       deferred.resolve []
@@ -147,6 +152,7 @@ class DataStorage
       return deferred.resolve null if not result?
       result.destroy()
     .then (result) ->
+      logger.debug "Data deleted in #{className}: #{JSON.stringify result}"
       deferred.resolve result
     , (error) ->
       deferred.reject null
@@ -162,6 +168,7 @@ class DataStorage
     query = new Parse.Query(className)
     query.find()
     .then (results) ->
+      logger.debug "All data deleted in #{className}: #{JSON.stringify results}"
       Parse.Object.destroyAll(results)
     , (error) ->
       deferred.reject null
@@ -180,7 +187,7 @@ class DataStorage
 
     @find @className.users, [{key:'code', value:code}]
     .then (results) =>
-      deferred.resolve results[0] if results?.length > 0
+      return deferred.resolve results[0] if results?.length > 0
       data =
         code: code
       @insert @className.users, data
@@ -201,7 +208,7 @@ class DataStorage
 
     _parentId = null
 
-    @getUser code
+    @getUser(code)
     .then (user) =>
       _parentId = user.id
       @findLatest @className.logs, [{key:'parentId',value:_parentId}]

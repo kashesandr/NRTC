@@ -2,10 +2,10 @@ nrtc = angular.module 'NRTC'
 
 nrtc.factory "dataService", ($rootScope, GLOBAL_CONFIGS) ->
 
-    DB_CONFIGS = GLOBAL_CONFIGS.database
+    DB_CONFIGS = GLOBAL_CONFIGS.DATABASE
 
     historyLoad = (count) ->
-        query = new Parse.Query DB_CONFIGS.table.history
+        query = new Parse.Query DB_CONFIGS.className.logs
         query.descending("updatedAt")
         .limit(count || 10)
         .find
@@ -21,7 +21,7 @@ nrtc.factory "dataService", ($rootScope, GLOBAL_CONFIGS) ->
 
     cardDelete = (id) ->
 
-        query = new Parse.Query DB_CONFIGS.table.history
+        query = new Parse.Query DB_CONFIGS.className.logs
 
         query.get id,
             success: (data) ->

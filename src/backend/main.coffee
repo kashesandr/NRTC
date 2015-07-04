@@ -1,6 +1,7 @@
 fs = require "fs"
 path = require "path"
 CONFIGS = JSON.parse fs.readFileSync (path.join(__dirname,'./settings.json')), 'utf8'
+logger = require './tools/logger'
 
 DataStorage = require './data-storage/controller'
 Rfid = require './rfid/controller'
@@ -15,4 +16,8 @@ rfid = new Rfid
 
 rfid.run()
 
-rfid.on 'data-received', dataStorage.log
+rfid.on 'data-received', (code) ->
+    dataStorage.log(code).then (log) ->
+       userId = log.get 'parentId'
+       action = log.get 'action'
+       logger.info "userId(#{userId}) has just #{action}ed"

@@ -264,7 +264,6 @@ describe 'DataStorage', ->
               expect(user.attributes).to.deep.equal(
                 expectedUser.attributes
               )
-
               expect(user.id).to.equal expectedUser.id
               done()
 

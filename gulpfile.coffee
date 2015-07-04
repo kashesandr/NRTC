@@ -15,6 +15,7 @@ gulpNgConfig = require "gulp-ng-config"
 fs = require "fs"
 replace = require "gulp-replace"
 mocha = require 'gulp-mocha'
+multipipe = require 'multipipe'
 CONFIGS = JSON.parse fs.readFileSync './settings.json', 'utf8'
 GLOBAL_CONFIGS = CONFIGS.GLOBAL_CONFIGS
 
@@ -32,17 +33,18 @@ backendDest =   "#{rootBuildPath}/#{backendPath}"
 appName = "NRTC"
 
 gulp.task "server-side", ->
+
+    replaceConfigs = multipipe(
+        replace(/"PARSE": \{(.*)\}/, "\"PARSE\": #{JSON.stringify GLOBAL_CONFIGS.PARSE}"),
+        replace(/"DATABASE": \{(.*)\}/, "\"DATABASE\": #{JSON.stringify GLOBAL_CONFIGS.DATABASE}")
+    )
+
     gulp.src([
         "#{backendSrc}/**/*"
         "!#{backendSrc}/**/test.coffee"
     ])
-    .pipe(
-      gulpif("settings.json",
-        replace(/"PARSE": \{(.*)\}/, "\"PARSE\": #{JSON.stringify GLOBAL_CONFIGS.parse}"),
-        replace(/"DATABASE": \{(.*)\}/, "\"DATABASE\": #{JSON.stringify GLOBAL_CONFIGS.database}")
-        )
-    )
-    .pipe(gulpif("*.coffee",coffee()))
+    .pipe(gulpif(/settings\.json/, replaceConfigs))
+    .pipe(gulpif("*.coffee", coffee()))
     .pipe(gulp.dest(backendDest))
 
 gulp.task 'clean:build', ->
@@ -131,32 +133,22 @@ gulp.task 'inject', ->
     .pipe(gulp.dest(frontendDest))
 
 gulp.task 'watch', ->
-    gulp.watch(
-        [
-            "#{frontendSrc}/**/*.jade"
-            "#{frontendSrc}/**/*.styl"
-            "#{frontendSrc}/**/*.coffee"
-        ], () ->
-        runSequence(
-            'templateCache',
-            'copy',
-            'inject',
-        )
-    )
+    gulp.watch( ["#{rootSrcPath}/**/*.jade"], ['default'] )
+    gulp.watch( ["#{rootSrcPath}/**/*.styl"], ['default'] )
+    gulp.watch( ["#{rootSrcPath}/**/*.coffee"], ['default'] )
 
 gulp.task 'default', () ->
-    gulp.start 'server-side'
     runSequence(
         'clean:build',
-        ['gulpNgConfig', 'templateCache'],
+        ['gulpNgConfig', 'templateCache', 'server-side'],
         ['copy:js', 'copy:html', 'copy:css'],
         'inject',
         'clean:extra'
-        #'watch'
+        'watch'
     )
 
 gulp.task 'test:backend', ->
-    # test backend
+# test backend
     gulp.src "#{backendSrc}/**/test.coffee"
     .pipe mocha
         clearRequireCache: true
@@ -164,12 +156,12 @@ gulp.task 'test:backend', ->
         reporter: 'list'
 
 gulp.task 'test:frontend', ->
-    # not yet
+# not yet
 
 gulp.task 'test', ->
     runSequence(
-      [
-        'test:backend'
-        'test:frontend'
-      ]
+        [
+            'test:backend'
+            'test:frontend'
+        ]
     )

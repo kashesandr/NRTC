@@ -1,11 +1,11 @@
 {
   "GLOBAL_CONFIGS": {
-    "parse": {
-      "applicationId": "",
-      "javascriptKey": "",
-      "masterKey": ""
+    "PARSE": {
+      "applicationId": "pTdFnP419voIpF3g2WW8gXR7rAGUnPZHMRPxHCPM",
+      "javascriptKey": "acF7kdoE5MdPHOlNVlK8295E23TAK1yc0CzVnv5V",
+      "masterKey": "mGpphj93gBhI0XUFXshwLGyJn9nnRQd876hcyHYP"
     },
-    "database": {
+    "DATABASE": {
       "className": {
         "logs": "Logs",
         "users": "Users"

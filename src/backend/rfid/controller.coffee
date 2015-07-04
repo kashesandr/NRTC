@@ -18,6 +18,7 @@ class Rfid
 
         if @error
             return logger.error "Reader: Error when initializing"
+        logger.error "Reader: Error when initializing"
 
         @_pnpIdRegexp = @configs.pnpIdRegexp
         @_chunksTimeout = @configs.chunksTimeout
@@ -71,7 +72,7 @@ class Rfid
         clearTimeout @_timer if @_timer
 
         @_timer = setTimeout =>
-            logger.info "Reader: Data Received: '#{@_code}'"
+            logger.debug "Reader: Data Received: '#{@_code}'"
             dispatch.emit 'data-received', @_code
             @_code = ''
         , @_chunksTimeout
