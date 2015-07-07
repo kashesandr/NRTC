@@ -1,6 +1,6 @@
 nrtc = angular.module 'NRTC'
 
-nrtc.controller "nrtcController", ($scope, PRICE) ->
+nrtc.controller "nrtcController", ($rootScope, $scope, PRICE) ->
 
     $scope.data = {}
 
@@ -18,4 +18,4 @@ nrtc.controller "nrtcController", ($scope, PRICE) ->
             }
 
     $scope.logDelete = (id) ->
-        $scope.$emit 'logDelete', id
+        $rootScope.$broadcast 'logDelete', id

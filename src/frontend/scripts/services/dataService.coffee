@@ -25,15 +25,15 @@ nrtc.factory "dataService", ($rootScope, GLOBAL_CONFIGS) ->
             query = new Parse.Query DB_CONFIGS.className.logs
             query.get id,
                 success: (data) ->
-                    $rootScope.$emit 'logDeleted', id
+                    $rootScope.$broadcast 'logDeleted', id
                     data.destroy({})
                 error: (error) ->
                     $rootScope.$broadcast 'error', error
 
-        usersLoad : (count = 10) ->
+        usersLoad : (count = 50) ->
             query = new Parse.Query DB_CONFIGS.className.users
             query
-            .equalTo('isOnline', true)
+            #.equalTo('isOnline', true)
             .limit(count)
             .find
                 success: (data) ->

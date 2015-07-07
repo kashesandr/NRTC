@@ -19,7 +19,7 @@ nrtc = angular
 
     $rootScope.$on "usersLoaded", ->
         window.setTimeout ->
-            $rootScope.$emit 'usersLoad', 50
+            $rootScope.$emit 'usersLoad'
         , UPDATE_TIMEOUT
 
-    $rootScope.$emit 'usersLoad', 50
+    $rootScope.$emit 'usersLoad'

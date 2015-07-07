@@ -18,12 +18,12 @@ class Rfid
 
         if @error
             return logger.error "Reader: Error when initializing"
-        logger.error "Reader: Error when initializing"
+        logger.info "Reader: initialized correctly"
 
         @_pnpIdRegexp = @configs.pnpIdRegexp
         @_chunksTimeout = @configs.chunksTimeout
 
-        @_code = ''
+        @_code = []
         @_timer = null
         @_rfidReader = null
 
@@ -66,17 +66,17 @@ class Rfid
                 dispatch.on 'data-received', callback
             else return null
 
-    _onDataReceive: (d = '') =>
+    _onDataReceive: (chunk) =>
 
-        @_code += d.toString 'hex' if d?
+        @_code.push (chunk.toString 'hex') if chunk?
         clearTimeout @_timer if @_timer
 
         @_timer = setTimeout =>
-            logger.debug "Reader: Data Received: '#{@_code}'"
-            dispatch.emit 'data-received', @_code
-            @_code = ''
+            code = @_code.join ''
+            logger.debug "Reader: Data Received: '#{code}'"
+            dispatch.emit 'data-received', code
+            @_code = []
         , @_chunksTimeout
-
 
     _findComName: (serial, pnpIdRegexp) ->
         deferred = Q.defer()

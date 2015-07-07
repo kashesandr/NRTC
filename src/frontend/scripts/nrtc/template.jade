@@ -19,8 +19,7 @@
                     th Price
                     th(ng-if="editMode") Action
                 tbody
-                    //tr(ng-repeat="entry in entries | orderBy:['isOnline','updatedAt']:true")
-                    tr(ng-repeat="entry in entries | orderBy:['isOnline','timeEnter','timeExit']:true")
+                    tr(ng-repeat="entry in entries | orderBy:['isOnline','updatedAt']:true")
                         td {{$index+1}}
                         td {{entry.code}}
                         td
