@@ -19,5 +19,7 @@ rfid.run()
 rfid.on 'data-received', (code) ->
     dataStorage.log(code).then (log) ->
        userId = log.get 'parentId'
-       action = log.get 'action'
+       enterTime = log.get 'enterTime'
+       exitTime = log.get 'exitTime'
+       action = if exitTime then 'exit' else 'enter'
        logger.info "userId(#{userId}) has just #{action}ed"
