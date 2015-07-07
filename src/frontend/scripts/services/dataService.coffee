@@ -6,22 +6,23 @@ nrtc.factory "dataService", ($rootScope, GLOBAL_CONFIGS) ->
 
     exports =
 
-        logsLoad : (count = 10) ->
+        logsLoad: (count = 50) ->
             query = new Parse.Query DB_CONFIGS.className.logs
-            query.descending("createdAt")
+            query.descending("updatedAt")
             .limit(count)
             .find
                 success: (data) ->
                     $rootScope.$broadcast 'logsLoaded', data.map (item)->
                         id: item.id
-                        code: item.get 'code'
                         parentId: item.get 'parentId'
-                        action: item.get 'action'
+                        enterTime: item.get 'enterTime'
+                        exitTime: item.get 'exitTime'
                         createdAt: item.createdAt
+                        updatedAt: item.updatedAt
                 error: (error) ->
                     $rootScope.$broadcast 'error', error
 
-        logDelete : (id) ->
+        logDelete: (id) ->
             query = new Parse.Query DB_CONFIGS.className.logs
             query.get id,
                 success: (data) ->
@@ -30,7 +31,7 @@ nrtc.factory "dataService", ($rootScope, GLOBAL_CONFIGS) ->
                 error: (error) ->
                     $rootScope.$broadcast 'error', error
 
-        usersLoad : (count = 50) ->
+        usersLoad: (count = 50) ->
             query = new Parse.Query DB_CONFIGS.className.users
             query
             #.equalTo('isOnline', true)
@@ -44,9 +45,10 @@ nrtc.factory "dataService", ($rootScope, GLOBAL_CONFIGS) ->
                 error: (error) ->
                     $rootScope.$broadcast 'error', error
 
-    # add events
-    for funcName, func of exports
-        $rootScope.$on funcName, (e, param) ->
-            func param
+    $rootScope.$on 'logsLoad', (e, param) ->
+        exports.logsLoad param
+
+    $rootScope.$on 'logDelete', (e, param) ->
+        exports.logDelete param
 
     exports
