@@ -3,6 +3,7 @@ path = require "path"
 logger = require './../tools/logger'
 Parse = require('parse').Parse
 Q = require 'q'
+nowTimestamp = require './../tools/now'
 
 class DataStorage
 
@@ -133,9 +134,19 @@ class DataStorage
   ###
   update: (className, id, data) ->
     return null if @error
+    deferred = Q.defer()
 
-    data.id = id
-    @insert className, data
+    Object = Parse.Object.extend className
+    object = new Object()
+    object.id = id
+
+    object.save(data).then =>
+      @findById(className, id).then (result) ->
+        deferred.resolve result
+    , (error)->
+      deferred.reject null
+
+    deferred.promise
 
   ###
   className = 'className'
@@ -213,16 +224,12 @@ class DataStorage
       _parentId = user.id
       @findLatest @className.logs, [{key:'parentId',value:_parentId}]
     .then (logs) =>
-      # the action should be 'exit'
-      # if the entry before was ''enter'
-      # otherwise it should be 'enter'
-      log = logs[0] or null
-      action = if log?.get('action') is 'enter' then 'exit' else 'enter'
-      userIsOnline = if action is 'enter' then true else false
-      Q.all(
-        @insert @className.logs, {action: action, parentId: _parentId}
-        @update @className.users, _parentId, {isOnline: userIsOnline}
-      )
-
+      # set enterTime when user enters
+      # set exitTime when user exits
+      log = logs?[0] or null
+      timestamp = nowTimestamp()
+      if not log or log.get('exitTime')?
+        return @insert @className.logs, {enterTime: timestamp, parentId: _parentId}
+      @update @className.logs, log.id, {exitTime: timestamp}
 
 module.exports = DataStorage

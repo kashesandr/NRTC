@@ -277,11 +277,8 @@ describe 'DataStorage', ->
 
             controller.log('not-existing-code')
             .then (log) ->
-              log.get('action').should.equal 'enter'
-              controller.findById "Users", log.get('parentId')
-            .then (user) ->
-              user.get('code').should.equal 'not-existing-code'
-              user.get('isOnline').should.equal true
+              expect(log.get('enterTime')).to.be.ok
+              expect(log.get('exitTime')).not.to.be.ok
               done()
 
           it 'works fine when a user exits', (done) ->
@@ -290,19 +287,19 @@ describe 'DataStorage', ->
             _parentId = null
 
             # when a user enters
-            controller.log('existing-code')
+            controller.log 'existing-code'
             .then (log) ->
               # and then the user exits
               controller.log 'existing-code'
             .then (log) ->
-              # the last action should be 'exit'
+              # a log entry should have defined enterTime and exitTime props
               _parentId = log.get('parentId')
-              log.get('action').should.equal 'exit'
+              console.log log.attributes
+              expect(log.get('enterTime')).to.be.ok
+              expect(log.get('exitTime')).to.be.ok
               controller.find('Logs', [{key:'parentId',value:_parentId}])
             .then (results) ->
-              # and there should be 2 log entries in Logs for the user
-              results.should.have.length 2
+              # and there should be 1 log entry in Logs for the user
+              results.should.have.length 1
               controller.findById('Users', _parentId)
-            .then (user) ->
-              user.get('isOnline').should.equal false
               done()
