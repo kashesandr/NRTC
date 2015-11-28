@@ -5,7 +5,7 @@ nrtc = angular
 .module 'NRTC', ['parse-angular', 'angularMoment', 'ui.bootstrap', 'GlobalConfigs']
 
 .config (GLOBAL_CONFIGS)->
-    PARSE_CONFIGS = GLOBAL_CONFIGS.parse
+    PARSE_CONFIGS = GLOBAL_CONFIGS.PARSE
     Parse.initialize PARSE_CONFIGS.applicationId, PARSE_CONFIGS.javascriptKey
 
 .constant 'PRICE',
@@ -17,9 +17,9 @@ nrtc = angular
 
 .run ($rootScope, dataService, UPDATE_TIMEOUT) ->
 
-    $rootScope.$on "historyLoaded", ->
+    $rootScope.$on "logsLoaded", ->
         window.setTimeout ->
-            dataService.historyLoad(100)
+            $rootScope.$emit 'logsLoad'
         , UPDATE_TIMEOUT
 
-    dataService.historyLoad()
+    $rootScope.$emit 'logsLoad'
