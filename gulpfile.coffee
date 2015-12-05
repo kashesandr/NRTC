@@ -1,3 +1,5 @@
+require('coffee-script/register')
+
 gulp = require "gulp"
 runSequence = require 'run-sequence'
 templateCache = require 'gulp-angular-templatecache'
@@ -144,7 +146,7 @@ gulp.task 'default', () ->
         ['copy:js', 'copy:html', 'copy:css'],
         'inject',
         'clean:extra'
-        'watch'
+        #'watch'
     )
 
 gulp.task 'test:backend', ->
