@@ -1,7 +1,7 @@
 fs = require 'fs'
 path = require "path"
 logger = require './../tools/logger'
-Parse = require('parse').Parse
+Parse = require('parse/node').Parse
 Q = require 'q'
 nowTimestamp = require './../tools/now'
 

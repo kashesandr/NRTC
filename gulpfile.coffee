@@ -146,11 +146,11 @@ gulp.task 'default', () ->
         ['copy:js', 'copy:html', 'copy:css'],
         'inject',
         'clean:extra'
-        #'watch'
+        'watch'
     )
 
 gulp.task 'test:backend', ->
-# test backend
+    # test backend
     gulp.src "#{backendSrc}/**/test.coffee"
     .pipe mocha
         clearRequireCache: true

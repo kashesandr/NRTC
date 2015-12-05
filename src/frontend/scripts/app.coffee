@@ -17,9 +17,16 @@ nrtc = angular
 
 .run ($rootScope, dataService, UPDATE_TIMEOUT) ->
 
-    $rootScope.$on "logsLoaded", ->
+    updatingLogs = true
+
+    $rootScope.$on "logs:updating", (e, val) ->
+        updatingLogs = val
+        $rootScope.$emit 'logs:load' if val is true
+
+    $rootScope.$on "logs:loaded", ->
+        return unless updatingLogs
         window.setTimeout ->
-            $rootScope.$emit 'logsLoad'
+            $rootScope.$emit 'logs:load'
         , UPDATE_TIMEOUT
 
-    $rootScope.$emit 'logsLoad'
+    $rootScope.$emit 'logs:load'
