@@ -13,14 +13,18 @@ class Rfid
         @error = false
 
         @error = true if \
-            not @configs?.pnpIdRegexp or \
+            not @configs.vendorId or \
+            not @configs.productId or \
             not @configs.chunksTimeout
 
         if @error
             return logger.error "Reader: Error when initializing"
         logger.info "Reader: initialized correctly"
 
-        @_pnpIdRegexp = @configs.pnpIdRegexp
+        @_vendorId = @configs.vendorId
+        @_productId = @configs.productId
+        console.log @_vendorId, @_productId
+
         @_chunksTimeout = @configs.chunksTimeout
 
         @_code = []
@@ -32,7 +36,7 @@ class Rfid
 
     run: ->
 
-        @_findComName(serialPort, @_pnpIdRegexp)
+        @_findComName(serialPort, @_vendorId, @_productId)
         .then (comName) =>
 
             @comName = comName
@@ -78,7 +82,7 @@ class Rfid
             @_code = []
         , @_chunksTimeout
 
-    _findComName: (serial, pnpIdRegexp) ->
+    _findComName: (serial, vendorId, productId) ->
         deferred = Q.defer()
 
         serial.list (error, ports) ->
@@ -86,14 +90,14 @@ class Rfid
             if error
                 msg = "Reader: Error occured when listing serialports: #{error}"
                 logger.error msg
-                deferred.reject msg
+                return deferred.reject msg
 
             for i in [0..ports.length]
                 port = ports[i]
-                if port?.pnpId.match pnpIdRegexp
+                if port? and (port.vendorId is vendorId) and (port.productId is productId)
                     return deferred.resolve port.comName
 
-            msg = "Reader: No serialports found with pnp like: #{pnpIdRegexp}"
+            msg = "Reader: No serialports found with vendorId #{vendorId} and productId #{productId}"
             logger.error msg
             deferred.reject msg
 

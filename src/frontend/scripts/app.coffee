@@ -8,12 +8,11 @@ nrtc = angular
     PARSE_CONFIGS = GLOBAL_CONFIGS.PARSE
     Parse.initialize PARSE_CONFIGS.applicationId, PARSE_CONFIGS.javascriptKey
 
-.constant 'PRICE',
-    "discountPeriodInMinutes": 60,
-    "priceBefore": 2,
-    "priceAfter": 1
+.factory 'UPDATE_TIMEOUT', (GLOBAL_CONFIGS) ->
+    return GLOBAL_CONFIGS.UPDATE_TIMEOUT_MILLISECONDS
 
-.constant 'UPDATE_TIMEOUT', 1000
+.factory 'PRICE_RULES', (GLOBAL_CONFIGS) ->
+    return GLOBAL_CONFIGS.PRICE_RULES
 
 .run ($rootScope, dataService, UPDATE_TIMEOUT) ->
 

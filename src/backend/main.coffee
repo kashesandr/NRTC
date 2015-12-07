@@ -11,7 +11,8 @@ dataStorage = new DataStorage
     className: CONFIGS.DATABASE.className
 
 rfid = new Rfid
-    pnpIdRegexp: new RegExp CONFIGS.SERIALPORT.PNP_ID_REGEXP, 'g'
+    vendorId: CONFIGS.SERIALPORT.vendorId
+    productId: CONFIGS.SERIALPORT.productId
     chunksTimeout: CONFIGS.CHUNKS_TIMEOUT
 
 rfid.run()

@@ -6,17 +6,54 @@ async = require 'async'
 
 Rfid = require './controller'
 
+###
+for MAC the USB device looks like:
+  {
+    comName: '/dev/cu.usbserial',
+    manufacturer: 'Prolific Technology Inc.',
+    serialNumber: '',
+    pnpId: '',
+    locationId: '0x14200000',
+    vendorId: '0x067b',
+    productId: '0x2303'
+  }
+###
+
 class SerialportMock
   constructor: () ->
     @ports = [
-      {pnpId: 'PL2303', comName: 'COM1'},
-      {pnpId: 'PL2304', comName: 'COM2'},
-      {pnpId: 'PL2305', comName: 'COM3'}
+      {
+        comName: '/dev/cu.usbserial1',
+        manufacturer: 'Prolific Technology Inc.',
+        serialNumber: '',
+        pnpId: '',
+        locationId: '0x14200000',
+        vendorId: '0x067b',
+        productId: '0x2303'
+      },
+      {
+        comName: '/dev/cu.usbserial2',
+        manufacturer: 'Prolific Technology Inc.',
+        serialNumber: '',
+        pnpId: '',
+        locationId: '0x14200000',
+        vendorId: '0x067a',
+        productId: '0x2304'
+      },
+      {
+        comName: '/dev/cu.usbserial3',
+        manufacturer: 'Prolific Technology Inc.',
+        serialNumber: '',
+        pnpId: '',
+        locationId: '0x14200000',
+        vendorId: '0x067h',
+        productId: '0x2300'
+      }
     ]
   list: (callback) ->
     callback null, @ports
 
-describe 'Rfid', ->
+describe.only 'Rfid', ->
 
   it 'should exist', ->
     Rfid.should.exists
@@ -40,23 +77,23 @@ describe 'Rfid', ->
       it 'run', ->
         rfid.run.should.exists
 
-      it 'findComName', (done) ->
+      it '_findComName', (done) ->
         rfid._findComName.should.exists
         serialport = new SerialportMock()
         async.parallel [
           (callback) ->
-            rfid._findComName(serialport, new RegExp("PL2303", 'g'))
+            rfid._findComName(serialport, '0x067b', '0x2303')
             .then (comName) -> callback null, comName
           (callback) ->
-            rfid._findComName(serialport, new RegExp("PL2304", 'g'))
+            rfid._findComName(serialport, '0x067a', '0x2304')
             .then (comName) -> callback null, comName
           (callback) ->
-            rfid._findComName(serialport, new RegExp("pnp", 'g'))
+            rfid._findComName(serialport, '0x067t', '0x2304')
             .catch (error) -> callback null, error
         ], (error, results) ->
-          results[0].should.equal 'COM1'
-          results[1].should.equal 'COM2'
-          expect(results[2]).to.deep.equal "Reader: No serialports found with pnp like: /pnp/g"
+          results[0].should.equal '/dev/cu.usbserial1'
+          results[1].should.equal '/dev/cu.usbserial2'
+          expect(results[2]).to.deep.equal "Reader: No serialports found with vendorId 0x067t and productId 0x2304"
           done()
 
       it "'data-received' event", (done) ->

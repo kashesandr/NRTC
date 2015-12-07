@@ -10,6 +10,17 @@
         "logs": "Logs",
         "users": "Users"
       }
-    }
+    },
+    "PRICE_RULES": [
+      {
+        "priceInMinute": 1,
+        "afterMinutes": 0
+      },
+      {
+        "priceInMinute": 2,
+        "afterMinutes": 5
+      }
+    ],
+    "UPDATE_TIMEOUT_MILLISECONDS": 1000
   }
 }

@@ -1,6 +1,7 @@
 {
     "SERIALPORT": {
-        "PNP_ID_REGEXP": "PID_2303"
+        "vendorId": "0x067b",
+        "productId": "0x2303"
     },
     "CHUNKS_TIMEOUT": 280,
     "PARSE": {},
