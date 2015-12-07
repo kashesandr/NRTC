@@ -12,7 +12,20 @@ nrtc = angular
     return GLOBAL_CONFIGS.UPDATE_TIMEOUT_MILLISECONDS
 
 .factory 'PRICE_RULES', (GLOBAL_CONFIGS) ->
-    return GLOBAL_CONFIGS.PRICE_RULES
+    ###
+    [
+      {
+        "start": 0,
+        "end": 5,
+        "pricePerMinute": 2
+      },
+      ...
+    ]
+    ###
+    return GLOBAL_CONFIGS.PRICE_RULES.map (item) ->
+        item.start = parseFloat item.start
+        item.end = parseFloat item.end
+        item
 
 .run ($rootScope, dataService, UPDATE_TIMEOUT) ->
 

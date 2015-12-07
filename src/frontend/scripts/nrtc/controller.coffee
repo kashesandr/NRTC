@@ -4,7 +4,6 @@ nrtc.controller "nrtcController", ($rootScope, $scope, PRICE_RULES) ->
 
     $scope.logs = []
     $scope.editMode = false
-    rules = PRICE_RULES
 
     $scope.$watch "editMode", (oldVal, newVal) ->
         return if oldVal is newVal
@@ -22,7 +21,6 @@ nrtc.controller "nrtcController", ($rootScope, $scope, PRICE_RULES) ->
     $scope.logDelete = (id) ->
         $rootScope.$broadcast 'logDelete', id
 
-
     ###
     helper functions
     expose them so they might be tested some day...
@@ -30,12 +28,23 @@ nrtc.controller "nrtcController", ($rootScope, $scope, PRICE_RULES) ->
 
     ###
     Apply rules so we may calculate the price
+    PRICE_RULES = [
+      {
+        "pricePerMinute": 1,
+        "afterMinutes": 0
+      }
+    ]
     ###
     $scope._getPriceFromMinutes = (value) ->
-        # if value < lower range bound
-        # if value within the bounds
-        # if value > max range bound
-        value
+        result = 0
+        x = 0
+        PRICE_RULES.forEach (item, i) ->
+            x = if value < item.end \
+                then value \
+                else item.end
+            result += item.pricePerMinute*x
+
+        result
 
     $scope._getDurationMinutes = (exitTime, enterTime) ->
         exitTime ?= (new Date()).getTime()

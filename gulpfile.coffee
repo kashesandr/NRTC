@@ -146,7 +146,7 @@ gulp.task 'default', () ->
         ['copy:js', 'copy:html', 'copy:css'],
         'inject',
         'clean:extra'
-        'watch'
+        #'watch'
     )
 
 gulp.task 'test:backend', ->
@@ -158,7 +158,8 @@ gulp.task 'test:backend', ->
         reporter: 'list'
 
 gulp.task 'test:frontend', ->
-# not yet
+    # not yet
+
 
 gulp.task 'test', ->
     runSequence(
