@@ -23,7 +23,6 @@ class Rfid
 
         @_vendorId = @configs.vendorId
         @_productId = @configs.productId
-        console.log @_vendorId, @_productId
 
         @_chunksTimeout = @configs.chunksTimeout
 

@@ -42,7 +42,7 @@ nrtc.controller "nrtcController", ($rootScope, $scope, PRICE_RULES) ->
             x = if value < item.end \
                 then value \
                 else item.end
-            result += item.pricePerMinute*x
+            result += item.pricePerMinute * x
 
         result
 

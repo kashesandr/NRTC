@@ -313,7 +313,6 @@ describe 'DataStorage', ->
             .then (log) ->
               # a log entry should have defined enterTime and exitTime props
               _parentId = log.get('parentId')
-              console.log log.attributes
               expect(log.get('enterTime')).to.be.ok
               expect(log.get('exitTime')).to.be.ok
               controller.find('Logs', [{key:'parentId',value:_parentId}])
