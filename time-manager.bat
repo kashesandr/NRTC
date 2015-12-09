@@ -1,0 +1,1 @@
+start cmd.exe /k "cd c:\Program Files\nrtc\build\backend & node app
