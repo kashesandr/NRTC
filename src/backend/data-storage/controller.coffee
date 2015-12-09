@@ -1,7 +1,7 @@
 fs = require 'fs'
 path = require "path"
 logger = require './../tools/logger'
-Parse = require('parse').Parse
+Parse = require('parse/node').Parse
 Q = require 'q'
 nowTimestamp = require './../tools/now'
 
@@ -34,7 +34,7 @@ class DataStorage
     @className = configs.className
 
   ###
-  className = 'className'
+  className = 'Users'
   data = {key: value}
   returns a promise
   ###
@@ -56,8 +56,8 @@ class DataStorage
     deferred.promise
 
   ###
-  className = 'className'
-  id = 'lala'
+  eg className = 'Users'
+  eg id = '<some id>'
   returns promise
   ###
   find: (className, equalToArray) ->
@@ -81,6 +81,11 @@ class DataStorage
 
     deferred.promise
 
+  ###
+  eg className = 'Users'
+  eg id = '<some id>'
+  returns a promise
+  ###
   findById: (className, id) ->
     return null if @error
 
@@ -98,10 +103,11 @@ class DataStorage
     deferred.promise
 
   ###
-  find latest entries inn className
+  find latest entries in <className>
   Input:
-    className = 'className'
-    count = <number>
+    eg className = 'className'
+    eg equalToArray = [{key:'action',value:'action-2'}]
+    eg limit = <number>
   returns a promise (array of latest entries)
   ###
   findLatest: (className, equalToArray = [], limit = 1) ->
@@ -128,9 +134,9 @@ class DataStorage
     deferred.promise
 
   ###
-  className = 'className'
-  id = 'lalala'
-  data = {...}, e.g. {action: 'update'}
+  eg className = 'Users'
+  eg id = '<some class>'
+  eg data = {action: 'update'}
   ###
   update: (className, id, data) ->
     return null if @error
@@ -149,9 +155,9 @@ class DataStorage
     deferred.promise
 
   ###
-  className = 'className'
-  objectId = 'lalala'
-  returns promise
+  eg className = 'Users'
+  eg objectId = '<some id>'
+  returns a promise
   ###
   delete: (className, id) ->
     return null if @error
@@ -172,6 +178,9 @@ class DataStorage
 
     deferred.promise
 
+  ###
+  clear all in the <className>
+  ###
   deleteAll: (className) ->
     return null if @error
     deferred = Q.defer()
@@ -187,9 +196,9 @@ class DataStorage
     deferred.promise
 
   ###
-  Creates a new user based on code or selects existing user if the code already registered
+  Creates a new user based on code or returns existing user if the code already registered
   Input: code = 'blah'
-  Returns: a promise of a user object
+  Returns a promise (a user object)
   ###
   getUser: (code) ->
     return null if @error
@@ -209,10 +218,11 @@ class DataStorage
 
   ###
   Log an enter/exit event
+  Creates a new user and links the user with the input code
+
   Input: code = 'blah'
-  Output:
-    - it creates a new user and links the user with the input code
-    - returns a promise (a log object which has a parent attribute)
+
+  Returns a promise (a log object which has a parent attribute)
   ###
   log: (code) ->
     return null if @error

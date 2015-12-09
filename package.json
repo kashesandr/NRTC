@@ -23,7 +23,9 @@
   },
   "homepage": "https://github.com/kashesandr/NRTC",
   "dependencies": {
+    "body-parser": "^1.14.1",
     "coffee-script": "^1.9.1",
+    "express": "^4.13.3",
     "gulp": "~3.8.11",
     "gulp-angular-templatecache": "~1.5.0",
     "gulp-batch": "~1.0.5",
@@ -41,6 +43,7 @@
     "gulp-uglify": "~1.1.0",
     "gulp-wrap": "~0.11.0",
     "moment": "^2.9.0",
+    "morgan": "^1.6.1",
     "parse": "^1.4.2",
     "q": "^1.4.1",
     "run-sequence": "~1.0.2",
@@ -50,6 +53,7 @@
   "devDependencies": {
     "async": "^1.2.0",
     "chai": "^3.0.0",
+    "gulp": "^3.9.0",
     "gulp-mocha": "^2.0.1",
     "multipipe": "^0.1.2",
     "should": "^6.0.1"

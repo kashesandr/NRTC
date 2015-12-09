@@ -2,7 +2,7 @@ require 'coffee-script'
 chai = require 'chai'
 should = require "should"
 Q = require 'q'
-Parse = require('parse').Parse
+Parse = require('parse/node').Parse
 DataStorage = require './controller'
 expect = chai.expect
 
@@ -84,7 +84,7 @@ describe 'DataStorage', ->
           controller.deleteAll('Users')
         ).then(setTimeout done, 1000)
 
-      describe 'a generic method', ->
+      describe 'a method', ->
 
         describe '`insert` which', ->
 
@@ -97,10 +97,10 @@ describe 'DataStorage', ->
             .then (result) ->
               Inserted = Parse.Object.extend 'Test'
               query = new Parse.Query Inserted
-              query.get result.id,
-                success: (result) ->
-                  result.get('action').should.equal 'insert'
-                  done()
+              query.get(result.id)
+            .then (result) ->
+              result.get('action').should.equal 'insert'
+              done()
 
         describe '`find` which', ->
 
@@ -153,31 +153,46 @@ describe 'DataStorage', ->
           it 'exists', ->
             controller.findLatest.should.exists
 
-          it 'works fine', (done) ->
-            @timeout 10000
+          describe 'can', ->
 
-            Q.all(
-              controller.insert('Test', action:'findLatest-2'),
-              controller.insert('Test', action:'findLatest-2'),
-              controller.insert('Test', action:'findLatest-3')
-            ).then (result) ->
-              controller.findLatest('Test') # the latest
-            .then (latest) ->
-              latest.should.have.length 3
-              latest[0].get('action').should.equal 'findLatest-3'
-              controller.findLatest('Test', [{key:'action',value:'findLatest-2'}], 1)
-            .then (latest) ->
-              latest[0].get('action').should.equal 'findLatest-2'
-              controller.findLatest('Test', [], 2)
-            .then (latest) ->
-              latest.should.have.length 2
-              latest[0].get('action').should.equal 'findLatest-3'
-              latest[1].get('action').should.equal 'findLatest-2'
-              done()
+            beforeEach ->
+              @timeout 10000
+
+            it 'find the latest', (done) ->
+              controller.insert('TestID', action:'action-0')
+              .then ->
+                controller.insert('TestID', action:'action-9')
+              .then ->
+                controller.findLatest('TestID') # the latest
+              .then (latest) ->
+                latest.should.have.length 1
+                latest[0].get('action').should.equal 'action-9'
+                done()
+
+            it 'find the latest with search parameters', (done) ->
+              Q.all(
+                controller.insert('TestID', action:'action-2'),
+                controller.insert('TestID', action:'action-3'),
+                controller.insert('TestID', action:'action-2')
+              ).then ->
+                controller.findLatest('TestID', [{key:'action',value:'action-2'}], 1)
+              .then (latest) ->
+                latest[0].get('action').should.equal 'action-2'
+                done()
+
+            it 'find several latest entries', (done) ->
+              controller.insert('TestID', action:'action-3')
+              .then ->
+                controller.insert('TestID', action:'action-2')
+              .then ->
+                controller.findLatest('TestID', [], 2)
+              .then (latest) ->
+                latest.should.have.length 2
+                latest[0].get('action').should.equal 'action-2'
+                latest[1].get('action').should.equal 'action-3'
+                done()
 
           it 'works fine when no search results', (done) ->
-            @timeout 10000
-
             controller.findLatest('Test3')
             .then (results) ->
               results.should.have.length 0
@@ -294,7 +309,6 @@ describe 'DataStorage', ->
             .then (log) ->
               # a log entry should have defined enterTime and exitTime props
               _parentId = log.get('parentId')
-              console.log log.attributes
               expect(log.get('enterTime')).to.be.ok
               expect(log.get('exitTime')).to.be.ok
               controller.find('Logs', [{key:'parentId',value:_parentId}])

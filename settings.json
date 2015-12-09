@@ -10,6 +10,24 @@
         "logs": "Logs",
         "users": "Users"
       }
-    }
+    },
+    "PRICE_RULES": [
+      {
+        "start": 0,
+        "end": 5,
+        "pricePerMinute": 2
+      },
+      {
+        "start": 5,
+        "end": 60,
+        "pricePerMinute": 1
+      },
+      {
+        "start": 60,
+        "end": "Infinity",
+        "pricePerMinute": 0.5
+      }
+    ],
+    "UPDATE_TIMEOUT_MILLISECONDS": 1000
   }
 }

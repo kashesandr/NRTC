@@ -8,18 +8,50 @@ nrtc = angular
     PARSE_CONFIGS = GLOBAL_CONFIGS.PARSE
     Parse.initialize PARSE_CONFIGS.applicationId, PARSE_CONFIGS.javascriptKey
 
-.constant 'PRICE',
-    "discountPeriodInMinutes": 60,
-    "priceBefore": 2,
-    "priceAfter": 1
+.factory 'UPDATE_TIMEOUT', (GLOBAL_CONFIGS) ->
+    return GLOBAL_CONFIGS.UPDATE_TIMEOUT_MILLISECONDS
 
-.constant 'UPDATE_TIMEOUT', 1000
+.factory 'PRICE_RULES', (GLOBAL_CONFIGS) ->
+    ###
+    [
+      {
+        "start": 0,
+        "end": 5,
+        "pricePerMinute": 2
+      },
+      ...
+    ]
+    ###
+    return GLOBAL_CONFIGS.PRICE_RULES.map (item) ->
+        item.start = parseFloat item.start
+        item.end = parseFloat item.end
+        item
 
-.run ($rootScope, dataService, UPDATE_TIMEOUT) ->
+.constant 'CONSTANTS', {
+    ONLINE_COUNT: 50,
+    LOGS_COUNT: 50
+}
 
-    $rootScope.$on "logsLoaded", ->
+.run ($rootScope, dataService, UPDATE_TIMEOUT, CONSTANTS) ->
+
+    updating = true
+
+    $rootScope.$on "updating", (e, val) ->
+        updating = val
+        if val is true
+            $rootScope.$emit 'users-online:load'
+            $rootScope.$emit 'logs:load'
+
+    $rootScope.$on "users-online:loaded", ->
+        return unless updating
         window.setTimeout ->
-            $rootScope.$emit 'logsLoad'
+            $rootScope.$emit 'users-online:load'
         , UPDATE_TIMEOUT
+    $rootScope.$emit 'users-online:load', CONSTANTS.ONLINE_COUNT
 
-    $rootScope.$emit 'logsLoad'
+    $rootScope.$on "logs:loaded", ->
+        return unless updating
+        window.setTimeout ->
+            $rootScope.$emit 'logs:load'
+        , UPDATE_TIMEOUT
+    $rootScope.$emit 'logs:load', CONSTANTS.LOGS_COUNT
