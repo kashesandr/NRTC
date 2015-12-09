@@ -1,25 +1,37 @@
 nrtc = angular.module 'NRTC'
 
-nrtc.controller "nrtcController", ($rootScope, $scope, PRICE_RULES) ->
+nrtc.controller "nrtcController", ($rootScope, $scope, PRICE_RULES, CONSTANTS) ->
 
     $scope.logs = []
     $scope.editMode = false
+    $scope.onlineCount = CONSTANTS.ONLINE_COUNT
+    $scope.logsCount = CONSTANTS.LOGS_COUNT
 
     $scope.$watch "editMode", (oldVal, newVal) ->
         return if oldVal is newVal
-        $scope.$emit "logs:updating", newVal
+        $scope.$emit "updating", newVal
 
     $scope.$on "logs:loaded", (e, data) ->
         $scope.logs = data.map (log) ->
             durationMinutes = $scope._getDurationMinutes(log.exitTime, log.enterTime)
-
-            log.isOnline = if log.exitTime then false else true
+            log.isOnline = not log.exitTime?
             log.durationMinutes = durationMinutes
             log.price = $scope._getPriceFromMinutes(durationMinutes)
             log
 
+    $scope.$on "users-online:loaded", (e, data) ->
+        $scope.online = data.map (item) ->
+            durationMinutes = $scope._getDurationMinutes(item.exitTime, item.enterTime)
+            item.isOnline = not item.exitTime?
+            item.durationMinutes = durationMinutes
+            item.price = $scope._getPriceFromMinutes(durationMinutes)
+            item
+
     $scope.logDelete = (id) ->
-        $rootScope.$broadcast 'logDelete', id
+        $rootScope.$broadcast 'log:delete', id
+
+    $scope.$on "log:deleted", ->
+        $scope.editMode = false
 
     ###
     helper functions

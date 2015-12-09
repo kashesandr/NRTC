@@ -53,7 +53,7 @@ class SerialportMock
   list: (callback) ->
     callback null, @ports
 
-describe.only 'Rfid', ->
+describe 'Rfid', ->
 
   it 'should exist', ->
     Rfid.should.exists
@@ -64,12 +64,14 @@ describe.only 'Rfid', ->
 
     beforeEach ->
       configs =
-        pnpIdRegexp: new RegExp 'pnp', 'g'
+        vendorId: '0x067b'
+        productId: '0x2303'
         chunksTimeout: 250
       rfid = new Rfid configs
 
     it 'be initialized correctly', ->
-      expect(rfid._pnpIdRegexp).to.deep.equal new RegExp('pnp', 'g')
+      expect(rfid._vendorId).to.equal '0x067b'
+      expect(rfid._productId).to.equal '0x2303'
       rfid._chunksTimeout.should.equal 250
 
     describe 'have working method', ->

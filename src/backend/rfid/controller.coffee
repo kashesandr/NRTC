@@ -49,6 +49,8 @@ class Rfid
 
             return @
 
+        return @
+
     addEvents: ->
 
         @_rfidReader.on 'open', =>

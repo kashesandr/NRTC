@@ -5,5 +5,9 @@
     },
     "CHUNKS_TIMEOUT": 280,
     "PARSE": {},
-    "DATABASE": {}
+    "DATABASE": {},
+    "SERVER": {
+        "host": "localhost",
+        "port": 8090
+    }
 }

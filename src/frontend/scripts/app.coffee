@@ -27,18 +27,31 @@ nrtc = angular
         item.end = parseFloat item.end
         item
 
-.run ($rootScope, dataService, UPDATE_TIMEOUT) ->
+.constant 'CONSTANTS', {
+    ONLINE_COUNT: 50,
+    LOGS_COUNT: 50
+}
 
-    updatingLogs = true
+.run ($rootScope, dataService, UPDATE_TIMEOUT, CONSTANTS) ->
 
-    $rootScope.$on "logs:updating", (e, val) ->
-        updatingLogs = val
-        $rootScope.$emit 'logs:load' if val is true
+    updating = true
+
+    $rootScope.$on "updating", (e, val) ->
+        updating = val
+        if val is true
+            $rootScope.$emit 'users-online:load'
+            $rootScope.$emit 'logs:load'
+
+    $rootScope.$on "users-online:loaded", ->
+        return unless updating
+        window.setTimeout ->
+            $rootScope.$emit 'users-online:load'
+        , UPDATE_TIMEOUT
+    $rootScope.$emit 'users-online:load', CONSTANTS.ONLINE_COUNT
 
     $rootScope.$on "logs:loaded", ->
-        return unless updatingLogs
+        return unless updating
         window.setTimeout ->
             $rootScope.$emit 'logs:load'
         , UPDATE_TIMEOUT
-
-    $rootScope.$emit 'logs:load'
+    $rootScope.$emit 'logs:load', CONSTANTS.LOGS_COUNT

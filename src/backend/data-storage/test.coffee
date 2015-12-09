@@ -159,16 +159,14 @@ describe 'DataStorage', ->
               @timeout 10000
 
             it 'find the latest', (done) ->
-              Q.all(
-                controller.insert('TestID', action:'action-2'),
-                controller.insert('TestID', action:'action-3')
-              ).then ->
-                controller.insert('TestID', action:'action-2')
+              controller.insert('TestID', action:'action-0')
+              .then ->
+                controller.insert('TestID', action:'action-9')
               .then ->
                 controller.findLatest('TestID') # the latest
               .then (latest) ->
                 latest.should.have.length 1
-                latest[0].get('action').should.equal 'action-2'
+                latest[0].get('action').should.equal 'action-9'
                 done()
 
             it 'find the latest with search parameters', (done) ->
@@ -182,7 +180,7 @@ describe 'DataStorage', ->
                 latest[0].get('action').should.equal 'action-2'
                 done()
 
-            it  'find several latest entries', (done) ->
+            it 'find several latest entries', (done) ->
               controller.insert('TestID', action:'action-3')
               .then ->
                 controller.insert('TestID', action:'action-2')
