@@ -1,1 +1,1 @@
-start cmd.exe /k "cd c:\Program Files\nrtc\build\backend & node app
+start cmd.exe /k "cd %programfiles% & cd ./nrtc/build/backend & node main
