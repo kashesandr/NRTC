@@ -193,8 +193,6 @@ describe 'DataStorage', ->
                 done()
 
           it 'works fine when no search results', (done) ->
-            @timeout 10000
-
             controller.findLatest('Test3')
             .then (results) ->
               results.should.have.length 0

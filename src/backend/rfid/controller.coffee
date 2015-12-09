@@ -13,16 +13,14 @@ class Rfid
         @error = false
 
         @error = true if \
-            not @configs.vendorId or \
-            not @configs.productId or \
+            not @configs.manufacturer or \
             not @configs.chunksTimeout
 
         if @error
             return logger.error "Reader: Error when initializing"
         logger.info "Reader: initialized correctly"
 
-        @_vendorId = @configs.vendorId
-        @_productId = @configs.productId
+        @_manufacturer = @configs.manufacturer
 
         @_chunksTimeout = @configs.chunksTimeout
 
@@ -35,7 +33,7 @@ class Rfid
 
     run: ->
 
-        @_findComName(serialPort, @_vendorId, @_productId)
+        @_findComName(serialPort, @_manufacturer)
         .then (comName) =>
 
             @comName = comName
@@ -83,8 +81,10 @@ class Rfid
             @_code = []
         , @_chunksTimeout
 
-    _findComName: (serial, vendorId, productId) ->
+    _findComName: (serial, manufacturer) ->
         deferred = Q.defer()
+
+        regexp = new RegExp manufacturer, 'ig'
 
         serial.list (error, ports) ->
 
@@ -95,10 +95,10 @@ class Rfid
 
             for i in [0..ports.length]
                 port = ports[i]
-                if port? and (port.vendorId is vendorId) and (port.productId is productId)
+                if port? and (port.manufacturer.match regexp)
                     return deferred.resolve port.comName
 
-            msg = "Reader: No serialports found with vendorId #{vendorId} and productId #{productId}"
+            msg = "Reader: No serialports found with manufacturer = #{manufacturer}"
             logger.error msg
             deferred.reject msg
 

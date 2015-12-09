@@ -17,6 +17,17 @@ for MAC the USB device looks like:
     vendorId: '0x067b',
     productId: '0x2303'
   }
+
+for Win the USB device looks like:
+  {
+    comName: 'COM3',
+    manufacturer: 'Prolific',
+    serialNumber: '',
+    pnpId: 'USB\\VID_067B&PID_2303\\6&29E6B3C2&0&4',
+    locationId: '',
+    vendorId: '',
+    productId: ''
+  }
 ###
 
 class SerialportMock
@@ -32,14 +43,14 @@ class SerialportMock
         productId: '0x2303'
       },
       {
-        comName: '/dev/cu.usbserial2',
-        manufacturer: 'Prolific Technology Inc.',
+        comName: 'COM3',
+        manufacturer: 'Prolific2',
         serialNumber: '',
-        pnpId: '',
-        locationId: '0x14200000',
-        vendorId: '0x067a',
-        productId: '0x2304'
-      },
+        pnpId: 'USB\\VID_067B&PID_2303\\6&29E6B3C2&0&4',
+        locationId: '',
+        vendorId: '',
+        productId: ''
+      }
       {
         comName: '/dev/cu.usbserial3',
         manufacturer: 'Prolific Technology Inc.',
@@ -64,14 +75,12 @@ describe 'Rfid', ->
 
     beforeEach ->
       configs =
-        vendorId: '0x067b'
-        productId: '0x2303'
+        manufacturer: 'prolific'
         chunksTimeout: 250
       rfid = new Rfid configs
 
     it 'be initialized correctly', ->
-      expect(rfid._vendorId).to.equal '0x067b'
-      expect(rfid._productId).to.equal '0x2303'
+      expect(rfid._manufacturer).to.equal 'prolific'
       rfid._chunksTimeout.should.equal 250
 
     describe 'have working method', ->
@@ -79,24 +88,33 @@ describe 'Rfid', ->
       it 'run', ->
         rfid.run.should.exists
 
-      it '_findComName', (done) ->
-        rfid._findComName.should.exists
-        serialport = new SerialportMock()
-        async.parallel [
-          (callback) ->
-            rfid._findComName(serialport, '0x067b', '0x2303')
-            .then (comName) -> callback null, comName
-          (callback) ->
-            rfid._findComName(serialport, '0x067a', '0x2304')
-            .then (comName) -> callback null, comName
-          (callback) ->
-            rfid._findComName(serialport, '0x067t', '0x2304')
-            .catch (error) -> callback null, error
-        ], (error, results) ->
-          results[0].should.equal '/dev/cu.usbserial1'
-          results[1].should.equal '/dev/cu.usbserial2'
-          expect(results[2]).to.deep.equal "Reader: No serialports found with vendorId 0x067t and productId 0x2304"
-          done()
+      describe '_findComName', ->
+
+        serialport = null
+
+        beforeEach ->
+          serialport = new SerialportMock()
+
+        it 'exists', ->
+          rfid._findComName.should.exists
+
+        it 'for MAC', (done) ->
+          rfid._findComName(serialport, 'prolific')
+          .then (comName) ->
+            comName.should.equal '/dev/cu.usbserial1', '/dev/cu.usbserial1'
+            done()
+
+        it 'for Windows', (done) ->
+          rfid._findComName(serialport, 'prolific2')
+          .then (comName) ->
+            comName.should.equal 'COM3', 'COM3'
+            done()
+
+        it 'throws error', (done) ->
+          rfid._findComName(serialport, 'prolific3')
+          .catch (error) ->
+            expect(error).to.deep.equal "Reader: No serialports found with manufacturer = prolific3"
+            done()
 
       it "'data-received' event", (done) ->
         rfid.on 'data-received', (d) ->
