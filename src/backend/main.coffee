@@ -21,9 +21,8 @@ dataStorage = new DataStorage
   Setup Rfid Reader
 ###
 rfid = new Rfid
-    vendorId: CONFIGS.SERIALPORT.vendorId
-    productId: CONFIGS.SERIALPORT.productId
-    chunksTimeout: CONFIGS.CHUNKS_TIMEOUT
+    manufacturer: CONFIGS.SERIALPORT.manufacturer
+    chunksTimeout: CONFIGS.SERIALPORT.CHUNKS_TIMEOUT
 
 rfid
 .run()

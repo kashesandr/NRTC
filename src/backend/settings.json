@@ -1,9 +1,8 @@
 {
     "SERIALPORT": {
-        "vendorId": "0x067b",
-        "productId": "0x2303"
+        "manufacturer": "prolific",
+        "CHUNKS_TIMEOUT": 280
     },
-    "CHUNKS_TIMEOUT": 280,
     "PARSE": {},
     "DATABASE": {},
     "SERVER": {
