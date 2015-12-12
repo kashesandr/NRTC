@@ -18,6 +18,8 @@ fs = require "fs"
 replace = require "gulp-replace"
 mocha = require 'gulp-mocha'
 multipipe = require 'multipipe'
+uglify = require 'gulp-uglify'
+license = require 'gulp-license'
 CONFIGS = JSON.parse fs.readFileSync './settings.json', 'utf8'
 GLOBAL_CONFIGS = CONFIGS.GLOBAL_CONFIGS
 
@@ -35,18 +37,31 @@ backendDest =   "#{rootBuildPath}/#{backendPath}"
 appName = "NRTC"
 
 gulp.task "server-side", ->
+    runSequence(
+        'server-side:configs'
+        'server-side:scripts'
+    )
 
+gulp.task 'server-side:scripts', ->
+    gulp.src([
+        "#{backendSrc}/**/*.coffee"
+        "!#{backendSrc}/**/test.coffee"
+    ])
+    .pipe(coffee())
+    .pipe(uglify(
+        mangling: true
+    ))
+    .pipe(gulp.dest(backendDest))
+
+gulp.task 'server-side:configs', ->
     replaceConfigs = multipipe(
         replace(/"PARSE": \{(.*)\}/, "\"PARSE\": #{JSON.stringify GLOBAL_CONFIGS.PARSE}"),
         replace(/"DATABASE": \{(.*)\}/, "\"DATABASE\": #{JSON.stringify GLOBAL_CONFIGS.DATABASE}")
     )
-
     gulp.src([
-        "#{backendSrc}/**/*"
-        "!#{backendSrc}/**/test.coffee"
+        "#{backendSrc}/**/settings.json"
     ])
-    .pipe(gulpif(/settings\.json/, replaceConfigs))
-    .pipe(gulpif("*.coffee", coffee()))
+    .pipe(replaceConfigs)
     .pipe(gulp.dest(backendDest))
 
 gulp.task 'clean:build', ->
@@ -105,7 +120,7 @@ gulp.task 'copy:js', ->
     .pipe(gulpif(/ui-bootstrap.min.js/,wrap('(function(){\n"use strict";\n<%= contents %>\n})();')))
     .pipe(gulpif(/ui-bootstrap-tpls.min.js/,wrap('(function(){\n"use strict";\n<%= contents %>\n})();')))
     .pipe(concat('all.js'))
-    #.pipe(uglify())
+    .pipe(uglify())
     .pipe(gulp.dest("#{frontendDest}/js"))
 
 gulp.task 'copy:html', ->
@@ -146,6 +161,7 @@ gulp.task 'default', () ->
         ['copy:js', 'copy:html', 'copy:css'],
         'inject',
         'clean:extra'
+        'license'
         #'watch'
     )
 
@@ -160,11 +176,24 @@ gulp.task 'test:backend', ->
 gulp.task 'test:frontend', ->
     # not yet
 
+gulp.task 'license:frontend', ->
+    gulp.src("#{frontendDest}/**/*.js")
+    .pipe(license('Apache', {tyny: false, organization: 'http://kashesandr.com'}))
+    .pipe(gulp.dest(frontendDest))
+
+gulp.task 'license:backend', ->
+    gulp.src("#{backendDest}/**/*.js")
+    .pipe(license('Apache', {tyny: false, organization: 'http://kashesandr.com'}))
+    .pipe(gulp.dest(backendDest))
+
+gulp.task 'license', ->
+    runSequence [
+        'license:backend'
+        'license:frontend'
+    ]
 
 gulp.task 'test', ->
-    runSequence(
-        [
-            'test:backend'
-            'test:frontend'
-        ]
-    )
+    runSequence [
+        'test:backend'
+        'test:frontend'
+    ]
