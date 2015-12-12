@@ -1,6 +1,6 @@
 {
   "name": "NRTC",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "nodejs rfid time controller",
   "main": "main.js",
   "scripts": {

@@ -1,8 +1,6 @@
 # NRTC
 NodeJS RFID Time Controller
 
-Version 0.1.2
-
 # What is it?
 It is the application which allows to calculate time that somebody spent somewhere. It's perfectly suitable for a time-based cafes. When you're paid for time that visitors spent in your cafe.
 When a visitor enters he must be checked in and checked out when exits. The system automatically calculates (based on defined rules) the price for the visitor when he gets out.
