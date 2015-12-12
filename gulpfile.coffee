@@ -45,7 +45,7 @@ gulp.task "server-side", ->
 gulp.task 'server-side:scripts', ->
     gulp.src([
         "#{backendSrc}/**/*.coffee"
-        "!#{backendSrc}/**/test.coffee"
+        "!#{backendSrc}/**/*test.coffee"
     ])
     .pipe(coffee())
     .pipe(uglify(
@@ -103,6 +103,7 @@ gulp.task 'templateCache', ->
 
 gulp.task 'copy:js', ->
     gulp.src([
+        "!#{frontendSrc}/**/*test.coffee"
         "#{bowerPath}/jquery/dist/jquery.js"
         "#{bowerPath}/bootstrap/dist/js/bootstrap.min.js"
         "#{bowerPath}/angular/angular.min.js"
@@ -120,7 +121,7 @@ gulp.task 'copy:js', ->
     .pipe(gulpif(/ui-bootstrap.min.js/,wrap('(function(){\n"use strict";\n<%= contents %>\n})();')))
     .pipe(gulpif(/ui-bootstrap-tpls.min.js/,wrap('(function(){\n"use strict";\n<%= contents %>\n})();')))
     .pipe(concat('all.js'))
-    .pipe(uglify())
+    #.pipe(uglify())
     .pipe(gulp.dest("#{frontendDest}/js"))
 
 gulp.task 'copy:html', ->
@@ -167,7 +168,7 @@ gulp.task 'default', () ->
 
 gulp.task 'test:backend', ->
     # test backend
-    gulp.src "#{backendSrc}/**/test.coffee"
+    gulp.src "#{backendSrc}/**/*test.coffee"
     .pipe mocha
         clearRequireCache: true
         ignoreLeaks: true
