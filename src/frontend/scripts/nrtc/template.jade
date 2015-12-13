@@ -29,7 +29,7 @@
                         td {{log.enterTime | amDateFormat:'HH:mm:ss (MMM D YYYY)'}}
                         td
                             .label(ng-class="{'true':'label-success','false':'label-default'}[log.isOnline]")
-                                | {{ log.durationMinutes }}
+                                | {{ log.durationSeconds | secondsToDateTime | date:'HH:mm:ss' }}
                         td
                             .label(ng-class="{'true':'label-success','false':'label-info'}[log.isOnline]")
                                 | {{log.price}}
@@ -59,7 +59,7 @@
                         td {{log.exitTime | amDateFormat:'HH:mm:ss (MMM D YYYY)'}}
                         td
                             .label(ng-class="{'true':'label-success','false':'label-default'}[log.isOnline]")
-                                | {{ log.durationMinutes }}
+                                | {{ log.durationSeconds | secondsToDateTime | date:'HH:mm:ss' }}
                         td
                             .label(ng-class="{'true':'label-success','false':'label-info'}[log.isOnline]")
                                 | {{log.price}}

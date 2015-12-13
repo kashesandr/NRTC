@@ -23,14 +23,25 @@ nrtc = angular
     ]
     ###
     return GLOBAL_CONFIGS.PRICE_RULES.map (item) ->
-        item.start = parseFloat item.start
-        item.end = parseFloat item.end
+        secondsInPeriod = item.secondsInPeriod
+
+        item.periodStart = parseFloat item.periodStart
+        item.periodStartSeconds = item.periodStart * secondsInPeriod
+
+        item.periodEnd = parseFloat item.periodEnd
+        item.periodEndSeconds = item.periodEnd * secondsInPeriod
+
         item
 
 .constant 'CONSTANTS', {
     ONLINE_COUNT: 50,
     LOGS_COUNT: 50
 }
+
+.filter('secondsToDateTime', [ ->
+    return (seconds) ->
+        return new Date(1970, 0, 1).setSeconds(seconds)
+])
 
 .run ($rootScope, dataService, UPDATE_TIMEOUT, CONSTANTS) ->
 

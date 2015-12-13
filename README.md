@@ -19,7 +19,7 @@ Software (that I used):
 - Drivers for the reader (http://www.prolific.com.tw/US/ShowProduct.aspx?pcid=41)
 - NodeJS + npm (https://nodejs.org/)
 - Python 2.7.6 (https://www.python.org/download/releases/2.7.6/)
-- Visual Studio Express 2013 for Windows Desktop (https://www.visualstudio.com/en-us/products/visual-studio-express-vs.aspx) (`node-gyp` plugin uses that to build `node-serialport`)
+- Visual Studio Express 2013 for Windows Desktop (https://www.microsoft.com/en-gb/download/details.aspx?id=44914) (`node-gyp` plugin uses that to build `node-serialport`)
 - Account on `http://parse.com/` (it is a data storage for the app)
 
 ## Installation

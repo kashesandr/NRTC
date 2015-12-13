@@ -13,19 +13,28 @@
     },
     "PRICE_RULES": [
       {
-        "start": 0,
-        "end": 5,
-        "pricePerMinute": 2
+        "periodStart": 0,
+        "periodEnd": 1,
+        "secondsInPeriod": 60,
+        "pricePerPeriod": 1
       },
       {
-        "start": 5,
-        "end": 60,
-        "pricePerMinute": 1
+        "periodStart": 1,
+        "periodEnd": 2,
+        "secondsInPeriod": 60,
+        "pricePerPeriod": 2
       },
       {
-        "start": 60,
-        "end": "Infinity",
-        "pricePerMinute": 0.5
+        "periodStart": 2,
+        "periodEnd": 3,
+        "secondsInPeriod": 60,
+        "pricePerPeriod": 3
+      },
+      {
+        "periodStart": 3,
+        "periodEnd": "Infinity",
+        "secondsInPeriod": 60,
+        "pricePerPeriod": 1
       }
     ],
     "UPDATE_TIMEOUT_MILLISECONDS": 1000
