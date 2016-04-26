@@ -173,6 +173,7 @@ gulp.task 'test:backend', ->
         clearRequireCache: true
         ignoreLeaks: true
         reporter: 'list'
+        timeout: 4000
 
 gulp.task 'test:frontend', ->
     # not yet

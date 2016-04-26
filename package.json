@@ -1,10 +1,11 @@
 {
   "name": "NRTC",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "nodejs rfid time controller",
   "main": "main.js",
   "scripts": {
-    "postinstall": "bower update"
+    "postinstall": "bower update",
+    "start": "node build/backend/main.js"
   },
   "repository": {
     "type": "git",
@@ -21,7 +22,7 @@
     "body-parser": "^1.14.1",
     "coffee-script": "^1.9.1",
     "express": "^4.13.3",
-    "gulp": "~3.8.11",
+    "gulp": "~3.9.1",
     "gulp-angular-templatecache": "~1.5.0",
     "gulp-batch": "~1.0.5",
     "gulp-clean": "~0.3.1",
@@ -42,7 +43,7 @@
     "parse": "^1.4.2",
     "q": "^1.4.1",
     "run-sequence": "~1.0.2",
-    "serialport": "1.6.1",
+    "serialport": "^2.0.6",
     "winston": "^1.0.0"
   },
   "devDependencies": {

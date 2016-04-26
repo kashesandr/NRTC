@@ -95,7 +95,7 @@ class Rfid
 
             for i in [0..ports.length]
                 port = ports[i]
-                if port? and (port.manufacturer.match regexp)
+                if port?.manufacturer?.match regexp
                     return deferred.resolve port.comName
 
             msg = "Reader: No serialports found with manufacturer = #{manufacturer}"
