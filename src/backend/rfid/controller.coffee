@@ -92,7 +92,9 @@ class Rfid
                 msg = "Reader: Error occured when listing serialports: #{error}"
                 logger.error msg
                 return deferred.reject msg
-
+                
+            logger.debug "list of ports found: #{JSON.stringify(ports)}"
+                
             for i in [0..ports.length]
                 port = ports[i]
                 logger.debug "port found: #{JSON.stringify(port)}"
