@@ -95,6 +95,7 @@ class Rfid
 
             for i in [0..ports.length]
                 port = ports[i]
+                logger.debug "port found: #{JSON.stringify(port)}"
                 if port?.manufacturer?.match regexp
                     return deferred.resolve port.comName
 

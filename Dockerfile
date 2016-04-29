@@ -1,14 +1,11 @@
 FROM node:4.4.0
 
-# Create app directory
-RUN mkdir -p /usr/src/app
+# Copy the App
+ADD . /usr/src/app
 WORKDIR /usr/src/app
 
-# install soft
+# installation
 RUN npm install -g bower gulp
-
-# get the app from github
-RUN git clone https://github.com/kashesandr/NRTC.git && cd NRTC
 
 # build the app
 RUN npm install && gulp
