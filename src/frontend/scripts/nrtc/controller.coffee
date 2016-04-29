@@ -56,14 +56,13 @@ nrtc.controller "nrtcController", ($rootScope, $scope, PRICE_RULES, CONSTANTS) -
         result = 0
 
         for item, i in PRICE_RULES
-            secondsInPeriod = item.secondsInPeriod
             if value <= item.periodStartSeconds
                 continue
             x = if value < item.periodEndSeconds \
-                then Math.ceil(value/secondsInPeriod)-item.periodStart \
-                else item.periodEnd - item.periodStart
-            result += item.pricePerPeriod * x
-
+                then value - item.periodStartSeconds \
+                else item.periodEndSeconds - item.periodStartSeconds
+            result += item.pricePerPeriod * Math.ceil(x / item.secondsInPeriod)
+    
         result
 
     $scope._getDurationSeconds = (exitTime, enterTime) ->
