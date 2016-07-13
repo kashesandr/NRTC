@@ -1,7 +1,9 @@
 # NRTC
 NodeJS RFID Time Controller
 
-## Backend part is deprecated, need to rewrite it using Java or something..
+# !!!
+# Backend part is deprecated, need to rewrite it using Java or something..
+# !!!
 
 # What is it?
 It is the application which allows to calculate time that somebody spent somewhere. It's perfectly suitable for a time-based cafes. When you're paid for time that visitors spent in your cafe.
